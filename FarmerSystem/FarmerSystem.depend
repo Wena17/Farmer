@@ -14,3 +14,8 @@
 
 1574378751 c:\users\h_hei\onedrive\dokumente\git-repos\farmer\farmersystem\ui.h
 
+1574379634 source:c:\users\h_hei\onedrive\dokumente\git-repos\farmer\farmersystem\ui.c
+	<string.h>
+	"curses.h"
+	"ui.h"
+

@@ -11,11 +11,11 @@ int main()
 {
     initscr(); // Initialize the curses library.
     int cursor_setting = curs_set(0);
-    noecho();
+    noecho(); // Typed characters are not automatically printed on the screen.
     welcomeMessage();
     homePage();
-    curs_set(cursor_setting);
-    echo();
+    curs_set(cursor_setting); // Back to normal.
+    echo(); // Back to normal.
     endwin(); // Close the curses library.
     return 0;
 }
