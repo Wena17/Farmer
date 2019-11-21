@@ -31,9 +31,15 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="curses.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="pdcurses.a" />
+		<Unit filename="ui.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="ui.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />
