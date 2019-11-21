@@ -6,11 +6,12 @@
     {
         welcomeMessage();
         homePage();
-        return;
+        return 0;
     }
-    void printMessageCenter(const char * message)
+
+    void printMessageCenter(const char *message)
     {
-        int space =0;
+        int space = 0;
         int pos = 0;
     /*calculate how many space need to print*/
         space = 58;
@@ -23,6 +24,7 @@
         /*print message*/
         printf("%s",message);
     }
+
     void headMessage(const char *message)
     {
         system("CLS");
@@ -36,6 +38,7 @@
         printf("\n\t\t\t*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*");
 
     }
+
     void welcomeMessage()
     {
         headMessage("Welcome");
@@ -56,6 +59,7 @@
         getch();
 
     }
+
     void homePage()
     {
         int num;

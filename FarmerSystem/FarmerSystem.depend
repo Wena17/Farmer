@@ -1,0 +1,5 @@
+# depslib dependency file v1.0
+1574367039 source:c:\users\h_hei\onedrive\dokumente\git-repos\farmer\farmersystem\main.c
+	<stdio.h>
+	<string.h>
+
