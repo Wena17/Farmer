@@ -1,8 +1,9 @@
 # depslib dependency file v1.0
-1574377597 source:c:\users\h_hei\onedrive\dokumente\git-repos\farmer\farmersystem\main.c
+1574378746 source:c:\users\h_hei\onedrive\dokumente\git-repos\farmer\farmersystem\main.c
 	<stdio.h>
 	<string.h>
 	"curses.h"
+	"ui.h"
 
 1574371540 c:\users\h_hei\onedrive\dokumente\git-repos\farmer\farmersystem\curses.h
 	<stdarg.h>
@@ -10,4 +11,6 @@
 	<stdio.h>
 	<wchar.h>
 	<stdbool.h>
+
+1574378751 c:\users\h_hei\onedrive\dokumente\git-repos\farmer\farmersystem\ui.h
 

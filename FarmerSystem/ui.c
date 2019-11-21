@@ -1,3 +1,5 @@
+
+#include <string.h>
 #include "curses.h"
 #include "ui.h"
 
