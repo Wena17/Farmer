@@ -10,8 +10,12 @@ int menu(const char **items);
 int main()
 {
     initscr(); // Initialize the curses library.
+    int cursor_setting = curs_set(0);
+    noecho();
     welcomeMessage();
     homePage();
+    curs_set(cursor_setting);
+    echo();
     endwin(); // Close the curses library.
     return 0;
 }
@@ -69,6 +73,7 @@ void homePage()
     menu(m);
 }
 
+/* Show a menu with a null-pointer terminated list of items and return the user's selection. */
 int menu(const char **items)
 {
     /* Determine the length of the longest menu item. */
@@ -96,8 +101,13 @@ int menu(const char **items)
     }
     mvwprintw(win, num_items + 2, 0, "%s", "Enter your choice.");
     wrefresh(win);
-    int choice = getch() - '1'; // Neat way to translate the character to the zero-based index of the item.
-    werase(win);
-    delwin(win);
-    return choice < 0 || choice >= num_items ? -1 : choice;
+    int choice;
+    do
+    {
+        choice = getch() - '1'; // Neat way to translate the character to the zero-based index of the item.
+    } while (choice < 0 || choice >= num_items);
+    wclear(win); // Clear the window.
+    wrefresh(win); // Display the changes.
+    delwin(win); // Free up the window memory.
+    return choice;
 }
