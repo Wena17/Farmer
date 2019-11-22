@@ -1,11 +1,12 @@
 # depslib dependency file v1.0
-1574384770 source:c:\users\h_hei\onedrive\dokumente\git-repos\farmer\farmersystem\main.c
+1574386256 source:c:\users\h_hei\onedrive\dokumente\git-repos\farmer\farmersystem\main.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
 	"curses.h"
-	"ui.h"
 	"sqlite3.h"
+	"ui.h"
+	"db.h"
 
 1574371540 c:\users\h_hei\onedrive\dokumente\git-repos\farmer\farmersystem\curses.h
 	<stdarg.h>
@@ -82,4 +83,6 @@
 
 1574380275 c:\users\h_hei\onedrive\dokumente\git-repos\farmer\farmersystem\sqlite3.h
 	<stdarg.h>
+
+1574386263 c:\users\h_hei\onedrive\dokumente\git-repos\farmer\farmersystem\db.h
 
