@@ -3,7 +3,7 @@
 #include "curses.h"
 #include "ui.h"
 
-/* Show a menu with a null-pointer terminated list of items and return the user's selection. */
+/* Show a menu with a null-pointer terminated list of items and return the index of the user's selection. */
 int menu(const char **items)
 {
     /* Determine the length of the longest menu item. */
