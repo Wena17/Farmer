@@ -36,6 +36,11 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="pdcurses.a" />
+		<Unit filename="sqlite3.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="sqlite3.h" />
+		<Unit filename="sqlite3ext.h" />
 		<Unit filename="ui.c">
 			<Option compilerVar="CC" />
 		</Unit>
