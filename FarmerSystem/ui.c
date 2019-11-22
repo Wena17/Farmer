@@ -32,7 +32,7 @@ int menu(const char **items)
     {
         mvwprintw(win, i, 0, "%i) %s", i + 1, items[i]);
     }
-    mvwprintw(win, num_items + 2, 0, "%s", "Enter your choice.");
+    mvwprintw(win, num_items + 1, 0, "%s", "Enter your choice.");
     wrefresh(win);
     int choice;
     do
