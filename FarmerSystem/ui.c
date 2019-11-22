@@ -46,3 +46,18 @@ int menu(const char **items)
     return choice;
 }
 
+int login() {
+    int user = -1;
+    int width = COLS / 2;
+    int height = LINES / 2;
+    WINDOW *win = newwin(height, width, (COLS - width) / 2, (LINES - height) / 2);
+    wclear(win);
+    mvwprintw(win, 2, 2, "Username: ");
+    mvwprintw(win, 3, 2, "Password: ");
+    wrefresh(win);
+    getch();
+    wclear(win);
+    wrefresh(win);
+    delwin(win);
+    return user;
+}

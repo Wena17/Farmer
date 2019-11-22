@@ -73,6 +73,7 @@ void homePage()
 {
     clear();
     headMessage("HOMEPAGE");
+    int user = login();
     const char *m[] = { "Admin", "Seller", "Buyer", NULL }; // The NULL pointer marks the end of the list.
     menu(m);
 }
