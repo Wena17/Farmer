@@ -32,6 +32,10 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<Unit filename="curses.h" />
+		<Unit filename="db.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="db.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
