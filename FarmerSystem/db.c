@@ -10,47 +10,37 @@ int begin_tx();
 int commit_tx();
 int sql_exec(char *sql);
 
+char schema_sql[] =
+    "BEGIN;"
+    "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, user_name VARCHAR(255), email VARCHAR(255) NOT NULL, pw_hash VARCHAR(255));"
+    "CREATE UNIQUE INDEX IF NOT EXISTS users_email ON users (email);"
+    "INSERT INTO users (user_name, email, pw_hash) VALUES ('admin', 'test@example.org', 'xyz') ON CONFLICT DO NOTHING;"
+    "COMMIT;"
+    ;
+
 sqlite3 *db; // This is a handle to the database. It's global because we'll need it everywhere and there is only one.
 
 void init_db()
 {
-    int rc = sqlite3_open("db.sqlite3", &db); // Open (or create) the database file.
-    if (rc)
+    int rc;
+    rc = sqlite3_open("db.sqlite3", &db); // Open (or create) the database file.
+    if (rc != SQLITE_OK)
     {
-        printf("%s", "Could not open database; quitting.");
+        fprintf(stderr, "Could not open database, code %d. Quitting.\n", rc);
         exit(1);
     }
     char *err_msg;
-    rc = sqlite3_exec(db, "SELECT version FROM farmer_version LIMIT 1;", NULL, NULL, &err_msg);
+    rc = sqlite3_exec(db, schema_sql, NULL, NULL, &err_msg);
     if (rc != SQLITE_OK)
     {
         sqlite3_free(&err_msg);
-        create_db();
+        fprintf(stderr, "Code %d. Quitting.", rc);
     }
 }
 
 void close_db()
 {
     sqlite3_close(db);
-}
-
-void create_db()
-{
-    printf("Need to create database schema.\n");
-    if (sql_exec("CREATE TABLE IF NOT EXISTS farmer_version (id INTEGER PRIMARY KEY AUTOINCREMENT, version INTEGER NOT NULL);"));
-    {
-        printf("%s\n", "Could not create table farmer_version; quitting.");
-        exit(1);
-    }
-    if (begin_tx() == SQLITE_OK)
-    {
-        int rc = sql_exec("INSERT INTO farmer_version (version) VALUES (0);");
-        if (rc || !commit_tx())
-        {
-            printf("%s", "Quitting\n");
-            exit(1);
-        }
-    }
 }
 
 int sql_exec(char *sql)

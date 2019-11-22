@@ -7,7 +7,6 @@
 #include "db.h"
 
 /* Declare functions before use. */
-void init_db();
 void welcomeMessage();
 void homePage();
 
