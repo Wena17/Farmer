@@ -47,14 +47,28 @@ int menu(const char **items)
 }
 
 int login() {
+    char user_name[21];
+    char pass[11];
     int user = -1;
     int width = COLS / 2;
-    int height = 4;
+    int height = 7;
     WINDOW *win = newwin(height, width, (LINES - height) / 2, (COLS - width) / 2);
     wclear(win);
     mvwprintw(win, 2, 2, "Username: ");
     mvwprintw(win, 3, 2, "Password: ");
     wrefresh(win);
+    echo();
+    curs_set(1);
+    mvwscanw(win, 2, 12, "%20s", &user_name);
+    noecho();
+    mvwscanw(win, 3, 12, "%10s", &pass);
+    curs_set(0);
+    user = check_password(user_name, pass);
+    if (user == -1)
+    {
+        mvwprintw(win, 5, 2, "Wrong user name or password.");
+        wrefresh(win);
+    }
     getch();
     wclear(win);
     wrefresh(win);
