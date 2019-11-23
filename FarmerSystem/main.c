@@ -5,6 +5,7 @@
 #include "sqlite3.h"
 #include "ui.h"
 #include "db.h"
+#include "user.h"
 
 /* Declare functions before use. */
 void welcomeMessage();

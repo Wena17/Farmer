@@ -6,10 +6,18 @@
 #include "db.h"
 
 char schema_sql[] =
-    "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, user_name VARCHAR(255), email VARCHAR(255) NOT NULL, pw_hash VARCHAR(255));"
+    "CREATE TABLE IF NOT EXISTS users ("
+    "   id INTEGER PRIMARY KEY AUTOINCREMENT,"
+    "   user_name VARCHAR(255) NOT NULL,"
+    "   email VARCHAR(255) NOT NULL,"
+    "   pw_hash VARCHAR(255),"
+    "   isAdmin INTEGER NOT NULL CHECK (isAdmin BETWEEN 0 AND 1) DEFAULT 0"
+    "   );"
     "CREATE UNIQUE INDEX IF NOT EXISTS users_email ON users (email);"
     "BEGIN;"
-    "INSERT INTO users (user_name, email, pw_hash) VALUES ('admin', 'test@example.org', 'xyz') ON CONFLICT DO NOTHING;"
+    "INSERT INTO users (user_name, email, pw_hash, isAdmin) "
+    "   VALUES ('admin', 'test@example.org', 'xyz', 1) "
+    "   ON CONFLICT DO NOTHING;"
     "COMMIT;"
     ;
 
@@ -21,7 +29,7 @@ void init_db()
     rc = sqlite3_open("db.sqlite3", &db); // Open (or create) the database file.
     if (rc != SQLITE_OK)
     {
-        fprintf(stderr, "Could not open database, code %d. Quitting.\n", rc);
+        fprintf(stderr, "initdb: Could not open database, code %d. Quitting.\n", rc);
         exit(1);
     }
     char *err_msg;
@@ -29,8 +37,13 @@ void init_db()
     if (rc != SQLITE_OK)
     {
         sqlite3_free(&err_msg);
-        fprintf(stderr, "Code %d. Quitting.", rc);
+        fprintf(stderr, "initdb: Code %d: %s. Quitting.\n", rc, err_msg);
     }
+}
+
+sqlite3 *get_db()
+{
+    return db;
 }
 
 void close_db()
