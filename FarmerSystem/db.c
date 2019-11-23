@@ -5,15 +5,10 @@
 #include "sqlite3.h"
 #include "db.h"
 
-void create_db();
-int begin_tx();
-int commit_tx();
-int sql_exec(char *sql);
-
 char schema_sql[] =
-    "BEGIN;"
     "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, user_name VARCHAR(255), email VARCHAR(255) NOT NULL, pw_hash VARCHAR(255));"
     "CREATE UNIQUE INDEX IF NOT EXISTS users_email ON users (email);"
+    "BEGIN;"
     "INSERT INTO users (user_name, email, pw_hash) VALUES ('admin', 'test@example.org', 'xyz') ON CONFLICT DO NOTHING;"
     "COMMIT;"
     ;
