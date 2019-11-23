@@ -46,7 +46,8 @@ int menu(const char **items)
     return choice;
 }
 
-int login() {
+int login()
+{
     char user_name[21];
     char pass[11];
     int user = -1;
@@ -57,19 +58,26 @@ int login() {
     mvwprintw(win, 2, 2, "Username: ");
     mvwprintw(win, 3, 2, "Password: ");
     wrefresh(win);
-    echo();
-    curs_set(1);
-    mvwscanw(win, 2, 12, "%20s", &user_name);
-    noecho();
-    mvwscanw(win, 3, 12, "%10s", &pass);
-    curs_set(0);
-    user = check_password(user_name, pass);
-    if (user == -1)
+    do
     {
-        mvwprintw(win, 5, 2, "Wrong user name or password.");
-        wrefresh(win);
+        echo();
+        curs_set(1);
+        mvwscanw(win, 2, 12, "%20s", &user_name);
+        noecho();
+        mvwscanw(win, 3, 12, "%10s", &pass);
+        curs_set(0);
+        user = check_password(user_name, pass);
+        if (user == -1)
+        {
+            mvwprintw(win, 5, 2, "Wrong user name or password.");
+            wmove(win, 2, 12);
+            wclrtoeol(win);
+            wmove(win, 3, 12);
+            wclrtoeol(win);
+            wrefresh(win);
+        }
     }
-    getch();
+    while (user == -1);
     wclear(win);
     wrefresh(win);
     delwin(win);
