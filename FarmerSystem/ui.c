@@ -2,6 +2,7 @@
 #include <string.h>
 #include "curses.h"
 #include "ui.h"
+#include "user.h"
 
 /* Show a menu with a null-pointer terminated list of items and return the index of the user's selection. */
 int menu(const char **items)
@@ -46,11 +47,11 @@ int menu(const char **items)
     return choice;
 }
 
-int login()
+User *login()
 {
     char user_name[21];
     char pass[11];
-    int user = -1;
+    User *user = NULL;
     int width = COLS / 2;
     int height = 7;
     WINDOW *win = newwin(height, width, (LINES - height) / 2, (COLS - width) / 2);
@@ -67,7 +68,7 @@ int login()
         mvwscanw(win, 3, 12, "%10s", &pass);
         curs_set(0);
         user = check_password(user_name, pass);
-        if (user == -1)
+        if (user == NULL)
         {
             mvwprintw(win, 5, 2, "Wrong user name or password.");
             wmove(win, 2, 12);
@@ -77,7 +78,7 @@ int login()
             wrefresh(win);
         }
     }
-    while (user == -1);
+    while (user == NULL);
     wclear(win);
     wrefresh(win);
     delwin(win);

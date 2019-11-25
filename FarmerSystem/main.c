@@ -2,9 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "curses.h"
-#include "sqlite3.h"
 #include "ui.h"
-#include "db.h"
 #include "user.h"
 
 /* Declare functions before use. */
@@ -13,7 +11,7 @@ void homePage();
 
 int main()
 {
-    init_db();
+    load_users();
     initscr(); // Initialize the curses library.
     int cursor_setting = curs_set(0);
     noecho(); // Typed characters are not automatically printed on the screen.
@@ -22,7 +20,7 @@ int main()
     curs_set(cursor_setting); // Back to normal.
     echo(); // Back to normal.
     endwin(); // Close the curses library.
-    close_db();
+    save_users();
     return 0;
 }
 
@@ -74,7 +72,7 @@ void homePage()
 {
     clear();
     headMessage("HOMEPAGE");
-    int user = login();
+    User *user = login();
     const char *m[] = { "Admin", "Seller", "Buyer", NULL }; // The NULL pointer marks the end of the list.
     menu(m);
 }

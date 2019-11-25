@@ -4,7 +4,8 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define filename "data/users.csv"
+#define filename "users.csv"
+#define BUF_SIZE 256
 
 typedef struct User
 {
@@ -21,28 +22,34 @@ int users_max_id; // We keep track of the highest ID so we know which one to use
 
 int load_users()
 {
-    const FILE *f = fopen(filename, "r");
-    if (f == NULL)
+    FILE *f = fopen(filename, "r");
+    if (f == NULL) // Could not open the file.
     {
-        fprintf(stderr, "%s:%d Could not open file.\n", __FUNCTION__, __LINE__); // Print a nice error message with function name and line number.
-        return -1;
+        users = malloc(sizeof(User)); // Create one user.
+        users->id = ++users_max_id; // Increment *before* assigning.
+        strcpy(users->user_name, "admin");
+        strcpy(users->email, "test@example.org");
+        strcpy(users->pw_hash, "xyz");
+        users->is_admin = 1;
+        users->next = NULL;
+        return 1; // Pretend we read one user.
     }
-    char buf[256]; // We'll use this variable to load lines of our file into.
+    char buf[BUF_SIZE]; // We'll use this variable to load lines of our file into.
     User *previous = NULL;
     int count = 0; // Let's count the users.
     users_max_id = 0; // Keeping track of the highest id.
     while (true)
     {
-        if (fgets(&buf, 256, f) == NULL) // Read next line and check if end of file reached.
-            break; // File end, we're done.
-        User *u = malloc(sizeof(User));
+        if (fgets(buf, BUF_SIZE, f) == NULL) //  We've reached the end of the file.
+            break; // ... so exit the loop.
+        User *u = malloc(sizeof(User)); // Allocate memory for one user.
         u->next = NULL; // Initialize link in case this is the last one.
-        int rc = sscanf(buf, "%d,\"%31s\",\"%255s\",\"%255s\",%d\n", u->id, u->user_name, u->email, u->pw_hash, u->is_admin);
-        if (rc != 5)
+        int rc = sscanf(buf, " %d,%31[^,\n],%255[^,\n],%255[^,\n],%d", &u->id, u->user_name, u->email, u->pw_hash, (int *) &u->is_admin);
+        if (rc != 5) // This is an invalid line, skip it.
         {
-            fclose(f); // We don't want dangling open files in case of an error.
-            fprintf(stderr, "%s:%d Could not parse file.\n", __FUNCTION__, __LINE__);
-            return -1;
+            free(u); // Free the allocated memory because we're skipping.
+            fprintf(stderr, "Skipping invalid line.\n");
+            continue; // Loop around.
         }
         if (previous == NULL) // This means we just read the first user.
             users = u; // So remember the start of the list in our global variable.
@@ -58,25 +65,28 @@ int load_users()
 }
 
 int save_users() {
-    const FILE *f = fopen(filename, "w+");
+    FILE *f = fopen(filename, "w+");
     if (f == NULL)
     {
         fprintf(stderr, "%s:%d Could not open file.\n", __FUNCTION__, __LINE__); // Print a nice error message with function name and line number.
         return -1;
     }
-    User *u = users; // We start with the head of the list;
+    User *u = users; // We start with the head of the list.
+    int count = 0; // Let's count the users.
     while (u != NULL) // while we have more, we loop.
     {
-        int rc = fprintf(f, "%d,\"%31s\",\"%255s\",\"%255s\",%d\n", u->id, u->user_name, u->email, u->pw_hash, u->is_admin);
-        if (rc != 5)
+        int written = fprintf(f, "%d,%s,%s,%s,%d\n", u->id, u->user_name, u->email, u->pw_hash, u->is_admin);
+        if (written < 0 || written >= BUF_SIZE)
         {
             fclose(f); // We don't want dangling open files in case of an error.
             fprintf(stderr, "%s:%d Could not write file.\n", __FUNCTION__, __LINE__);
             return -1;
         }
+        count++;
         u = u->next;
     }
     fclose(f); // We're done here.
+    return count;
 }
 
 User *check_password(char *user_name, char *pw_hash)
