@@ -13,7 +13,8 @@ typedef struct User
 
 int load_users();
 int save_users();
-int add_user(User *u);
+
+User *add_user(const char *user_name, const char *email, const char *pw_hash);
 
 User *check_password(const char *user_name, const char *pw_hash);
 
