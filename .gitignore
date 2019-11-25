@@ -1,4 +1,6 @@
 *.sqlite3
+data/*
+*.save
 
 # Created by https://www.gitignore.io/api/codeblocks
 # Edit at https://www.gitignore.io/?templates=codeblocks
@@ -69,4 +71,3 @@ dkms.conf
 
 # Unignore pdcurses.a
 !pdcurses.a
-
