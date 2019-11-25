@@ -59,6 +59,8 @@ int load_users()
     return count; // Return the number of users, just to be nice.
 }
 
+/* Save all users in the file and return the number of users, or -1 if something went wrong.
+ * This is actually a bit bad because when the writing fails, all data would be lost. Don't worry for now but in a real program this would have to be handled better. */
 int save_users() {
     FILE *f = fopen(filename, "w+");
     if (f == NULL)

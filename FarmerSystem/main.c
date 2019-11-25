@@ -19,11 +19,7 @@ int main()
     int cursor_setting = curs_set(0);
     noecho(); // Typed characters are not automatically printed on the screen.
     welcomeMessage();
-    logion_or_signup();
-    if (user != NULL)
-    {
-        homePage();
-    }
+    homePage();
     curs_set(cursor_setting); // Back to normal.
     echo(); // Back to normal.
     endwin(); // Close the curses library.
@@ -86,9 +82,18 @@ void logion_or_signup()
         {
         case 0:
             user = login();
+            if(user != NULL)
+            {
+                seller();
+            }
             break;
         case 1:
-            user = signup();
+            user = signup();//If user name already exist should be error
+            if(user != NULL)
+            {
+                homePage();
+            }
+
             break;
         case 2:
             return;
@@ -107,14 +112,16 @@ void homePage()
         switch (menu(m))
         {
         case 0:
-            if (!user->is_admin)
+            login();
                 break;
             // TODO
             break;
         case 1:
+            logion_or_signup();
             // TODO
             break;
         case 2:
+            logion_or_signup();
             // TODO
             break;
         case 3:
@@ -122,5 +129,12 @@ void homePage()
             break;
         }
     }
+}
+void seller()
+{
+    clear();
+    headMessage("SELLER");
+    const char *sellm[] = { "Add new product", "See product updates", "Exit", NULL};
+
 }
 

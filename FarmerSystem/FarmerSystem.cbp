@@ -35,7 +35,6 @@
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="pdcurses.a" />
 		<Unit filename="ui.c">
 			<Option compilerVar="CC" />
 		</Unit>
