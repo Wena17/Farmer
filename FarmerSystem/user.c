@@ -4,18 +4,10 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "user.h"
+
 #define filename "users.csv"
 #define BUF_SIZE 256
-
-typedef struct User
-{
-    unsigned int id;
-    char user_name[32];
-    char email[256];
-    char pw_hash[256];
-    bool is_admin;
-    struct User *next;
-} User;
 
 User *users; // This is where we will keep the users.
 int users_max_id; // We keep track of the highest ID so we know which one to use next.
@@ -89,7 +81,7 @@ int save_users() {
     return count;
 }
 
-User *check_password(char *user_name, char *pw_hash)
+User *check_password(const char *user_name, const char *pw_hash)
 {
     User *u = users; // Start search at the head of the list.
     while (u != NULL) // While we have more...
@@ -101,4 +93,17 @@ User *check_password(char *user_name, char *pw_hash)
         u = u->next; // Else just continue with the next one.
     }
     return NULL; // We're at the end of the list and haven't found a match.
+}
+
+int add_user(User *u)
+{
+    /* First, we find the last user in the list. */
+    User *last = users;
+    while (last->next != NULL)
+        last = last->next;
+    u->id = ++users_max_id; // Assign the next id, increment *before* assignment.
+    last->next = u; // Append to the list.
+    u->next = NULL; // Make sure the list is properly terminated.
+    save_users(); // Update the file.
+    return u->id;
 }

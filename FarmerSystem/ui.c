@@ -1,4 +1,5 @@
 
+#include <stdlib.h>
 #include <string.h>
 #include "curses.h"
 #include "ui.h"
@@ -79,6 +80,43 @@ User *login()
         }
     }
     while (user == NULL);
+    wclear(win);
+    wrefresh(win);
+    delwin(win);
+    return user;
+}
+
+struct User *signup()
+{
+    User *user = malloc(sizeof(user)); // Allocate space for the new user.
+    user->next = NULL; // Initialize list chaining.
+    user->is_admin = false; // New users are never admins.
+    int width = COLS / 2;
+    int height = 8;
+    WINDOW *win = newwin(height, width, (LINES - height) / 2, (COLS - width) / 2);
+    wclear(win);
+    mvwprintw(win, 2, 2, "Username: ");
+    mvwprintw(win, 3, 2, "Email: ");
+    mvwprintw(win, 4, 2, "Password: ");
+    wrefresh(win);
+    echo(); // Turn on echo so the user sees what they are typing.
+    curs_set(1); // Show the cursor so the user sees where they are typing.
+    mvwscanw(win, 2, 12, "%20s", user->user_name);
+    mvwscanw(win, 3, 12, "%50s", user->email);
+    mvwscanw(win, 4, 12, "%20s", user->pw_hash);
+    curs_set(0); // Hide the cursor again.
+    noecho(); // Don't show what the users types.
+    wmove(win, 4, 12);
+    wclrtoeol(win); // Let's delete the password for security.
+    wrefresh(win);
+    int id = add_user(user); // Now add and save the user, return the new id.
+    if (id < 0) // Something went wrong.
+    {
+        free(user); // Free the memory we've allocated because this didn't work.
+        mvwprintw(win, 6, 2, "Something went wrong. Press any key to continue.");
+        wrefresh(win);
+        getch();
+    }
     wclear(win);
     wrefresh(win);
     delwin(win);

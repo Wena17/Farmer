@@ -7,5 +7,6 @@ int menu(const char **items);
 int login_or_register();
 
 User *login();
+User *signup();
 
 #endif // UI_H_INCLUDED

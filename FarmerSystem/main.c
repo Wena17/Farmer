@@ -9,6 +9,8 @@
 void welcomeMessage();
 void homePage();
 
+User *user = NULL; // This will be the logged in user.
+
 int main()
 {
     load_users();
@@ -72,8 +74,40 @@ void homePage()
 {
     clear();
     headMessage("HOMEPAGE");
-    User *user = login();
-    const char *m[] = { "Admin", "Seller", "Buyer", NULL }; // The NULL pointer marks the end of the list.
-    menu(m);
+    const char *solm[] = { "Login", "Sign up", NULL };
+    while (user == NULL)
+    {
+        switch (menu(solm))
+        {
+        case 0:
+            user = login();
+            continue;
+        case 1:
+            user = signup();
+            continue;
+        }
+    }
+    const char *m[] = { "Admin", "Seller", "Buyer", "Quit", NULL }; // The NULL pointer marks the end of the list.
+    bool is_running = true;
+    while (is_running)
+    {
+        switch (menu(m))
+        {
+        case 0:
+            if (!user->is_admin)
+                break;
+            // TODO
+            break;
+        case 1:
+            // TODO
+            break;
+        case 2:
+            // TODO
+            break;
+        case 3:
+            is_running = false;
+            break;
+        }
+    }
 }
 
