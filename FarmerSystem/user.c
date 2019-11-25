@@ -95,15 +95,33 @@ User *check_password(const char *user_name, const char *pw_hash)
     return NULL; // We're at the end of the list and haven't found a match.
 }
 
-int add_user(User *u)
+User *add_user(const char *user_name, const char *email, const char *pw_hash)
 {
     /* First, we find the last user in the list. */
     User *last = users;
     while (last->next != NULL)
         last = last->next;
+    User *u = malloc(sizeof(User));
     u->id = ++users_max_id; // Assign the next id, increment *before* assignment.
-    last->next = u; // Append to the list.
+    strcpy(u->user_name, user_name);
+    strcpy(u->email, email);
+    strcpy(u->pw_hash, pw_hash);
+    u->is_admin = false;
     u->next = NULL; // Make sure the list is properly terminated.
-    save_users(); // Update the file.
-    return u->id;
+    last->next = u; // Append to the list.
+    FILE *f = fopen(filename, "a+");
+    if (f == NULL)
+    {
+        fprintf(stderr, "%s:%d Could not open file.\n", __FUNCTION__, __LINE__); // Print a nice error message with function name and line number.
+        return NULL;
+    }
+    int written = fprintf(f, "%d,%s,%s,%s,%d\n", u->id, u->user_name, u->email, u->pw_hash, u->is_admin);
+    if (written < 0 || written >= BUF_SIZE)
+    {
+        fclose(f); // We don't want dangling open files in case of an error.
+        fprintf(stderr, "%s:%d Could not write file.\n", __FUNCTION__, __LINE__);
+        return NULL;
+    }
+    fclose(f); // We're done here.
+    return u;
 }
