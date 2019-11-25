@@ -7,6 +7,7 @@
 
 /* Declare functions before use. */
 void welcomeMessage();
+void logion_or_signup();
 void homePage();
 
 User *user = NULL; // This will be the logged in user.
@@ -18,7 +19,11 @@ int main()
     int cursor_setting = curs_set(0);
     noecho(); // Typed characters are not automatically printed on the screen.
     welcomeMessage();
-    homePage();
+    logion_or_signup();
+    if (user != NULL)
+    {
+        homePage();
+    }
     curs_set(cursor_setting); // Back to normal.
     echo(); // Back to normal.
     endwin(); // Close the curses library.
@@ -70,23 +75,31 @@ void welcomeMessage()
     getch();
 }
 
-void homePage()
+void logion_or_signup()
 {
     clear();
-    headMessage("HOMEPAGE");
-    const char *solm[] = { "Login", "Sign up", NULL };
+    headMessage("WHO ARE YOU?");
+    const char *solm[] = { "Login", "Sign up", "Quit", NULL };
     while (user == NULL)
     {
         switch (menu(solm))
         {
         case 0:
             user = login();
-            continue;
+            break;
         case 1:
             user = signup();
-            continue;
+            break;
+        case 2:
+            return;
         }
     }
+}
+
+void homePage()
+{
+    clear();
+    headMessage("HOMEPAGE");
     const char *m[] = { "Admin", "Seller", "Buyer", "Quit", NULL }; // The NULL pointer marks the end of the list.
     bool is_running = true;
     while (is_running)
