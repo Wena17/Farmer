@@ -4,6 +4,7 @@
 #include "curses.h"
 #include "ui.h"
 #include "user.h"
+#include "product.h"
 
 /* Show a menu with a null-pointer terminated list of items and return the index of the user's selection. */
 int menu(const char **items)
@@ -122,3 +123,43 @@ User *signup()
     delwin(win);
     return user;
 }
+Product *new_product()
+{
+    char product_name[256];
+    int quantity;
+    int price;
+    char location[256];
+    Product *newproduct = NULL;
+    int width = COLS / 2;
+    int height = 8;
+    WINDOW *win = newwin(height, width, (LINES - height) / 2, (COLS - width) / 2);
+    wclear(win);
+    mvwprintw(win, 2, 2, "Product name: ");
+    mvwprintw(win, 3, 2, "Quantity: ");
+    mvwprintw(win, 4, 2, "Price: ");
+    mvwprintw(win, 5, 2, "Location: ");
+    wrefresh(win);
+    echo();
+    curs_set(1);
+    mvwscanw(win, 2, 15, "%50s", product_name);
+    mvwscanw(win, 3, 15, "%d", &quantity);
+    mvwscanw(win, 4, 15, "%d", &price);
+    mvwscanw(win, 5, 15, "%100s", location);
+    curs_set(0);
+    noecho();
+    wmove(win, 4, 12);
+    wclrtoeol(win); // Let's delete the password for security.
+    wrefresh(win);
+    newproduct = add_product(product_name, quantity, price, location); // Now add and save the product, return the new id.
+    if (newproduct == NULL) // Something went wrong.
+    {
+        mvwprintw(win, 6, 2, "Something went wrong. Press any key to continue.");
+        wrefresh(win);
+        getch();
+    }
+    wclear(win);
+    wrefresh(win);
+    delwin(win);
+    return seller();
+}
+

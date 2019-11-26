@@ -9,6 +9,7 @@
 void welcomeMessage();
 void logion_or_signup();
 void homePage();
+void newproduct();
 
 User *user = NULL; // This will be the logged in user.
 
@@ -93,7 +94,6 @@ void logion_or_signup()
             {
                 homePage();
             }
-
             break;
         case 2:
             return;
@@ -133,8 +133,51 @@ void homePage()
 void seller()
 {
     clear();
+    int sell = NULL;
     headMessage("SELLER");
     const char *sellm[] = { "Add new product", "See product updates", "Exit", NULL};
-
+    while(sell == NULL)
+    {
+        switch(menu(sellm))
+        {
+        case 0:
+            newproduct();
+            //TODO
+            break;
+        case 1:
+            //TODO
+            break;
+        case 2:
+            return;
+            break;
+        }
+    }
+}
+void newproduct()
+{
+    clear();
+    int sell = NULL;
+    headMessage("PRODUCT TYPE");
+    const char *sellm[] = { "Fruits", "Vegetables", "Others", "Back", NULL};
+    while(sell == NULL)
+    {
+        switch(menu(sellm))
+        {
+        case 0:
+            new_product();
+            //TODO
+            break;
+        case 1:
+            new_product();
+            //TODO
+            break;
+        case 2:
+            //TODO
+            break;
+        case 3:
+            return;
+            break;
+        }
+    }
 }
 
