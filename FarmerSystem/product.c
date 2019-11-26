@@ -64,7 +64,8 @@ int load_products()
 
 /* Save all users in the file and return the number of users, or -1 if something went wrong.
  * This is actually a bit bad because when the writing fails, all data would be lost. Don't worry for now but in a real program this would have to be handled better. */
-int save_products() {
+int save_products()
+{
     FILE *f = fopen(filename, "w+");
     if (f == NULL)
     {
@@ -108,10 +109,10 @@ Product *add_product(const char *product_name, const int quantity, const int pri
     else
         products = new_product; // If there was no product before, now this one will be the beginning of our list.
     return append_product(new_product);
-}
 
-
-Product *append_product(const Product *new_product) {
+/* Write a new product to the end of the file. This more robust than writing the complete file every time but of course doesn't work for updates of exisitng products. */
+Product *append_product(const Product *new_product)
+{
     FILE *f = fopen(filename, "a+"); // Here we simply append a line at the end of the file. Note that this doesn't work for changes/updates.
     if (f == NULL)
     {
