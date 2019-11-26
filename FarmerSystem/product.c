@@ -8,6 +8,8 @@
 #define filename "products.csv"
 #define BUF_SIZE 256
 
+Product *append_product(const Product *new_product);
+
 Product *products; // This is where we will keep the users.
 int products_max_id = 0; // We keep track of the highest ID so we know which one to use next.
 
@@ -105,7 +107,12 @@ Product *add_product(const char *product_name, const int quantity, const int pri
         last->next = new_product; // Append to the list.
     else
         products = new_product; // If there was no product before, now this one will be the beginning of our list.
-    FILE *f = fopen(filename, "a+");
+    return append_product(new_product);
+}
+
+
+Product *append_product(const Product *new_product) {
+    FILE *f = fopen(filename, "a+"); // Here we simply append a line at the end of the file. Note that this doesn't work for changes/updates.
     if (f == NULL)
     {
         fprintf(stderr, "%s:%d Could not open file.\n", __FUNCTION__, __LINE__); // Print a nice error message with function name and line number.
@@ -121,4 +128,3 @@ Product *add_product(const char *product_name, const int quantity, const int pri
     fclose(f); // We're done here.
     return new_product;
 }
-
