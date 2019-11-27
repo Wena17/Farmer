@@ -8,7 +8,7 @@
 #define filename "products.csv"
 #define BUF_SIZE 256
 
-Product *append_product(const Product *new_product);
+Product *append_product(Product *new_product);
 
 Product *products; // This is where we will keep the users.
 int products_max_id = 0; // We keep track of the highest ID so we know which one to use next.
@@ -41,7 +41,7 @@ int load_products()
             break; // ... so exit the loop.
         Product *u = malloc(sizeof(Product));
         u->next = NULL; // Initialize link in case this is the last one.
-        int rc = sscanf(buf, " %d,%31[^,\n],%d,%d,%255[^,\n],%d", &u->id, u->product_name, u->quantity, &u->price, u->location, (int *) &u->is_fruit); // Read the various fields from the line in our buf variable.
+        int rc = sscanf(buf, " %d,%31[^,\n],%d,%d,%255[^,\n],%d", &u->id, u->product_name, &u->quantity, &u->price, u->location, (int *) &u->is_fruit); // Read the various fields from the line in our buf variable.
         if (rc != 5) // The number of fields read is in rc. This should be 5 unless it's somehow an invalid line. If it's invalid, simply skip it.
         {
             free(u); // Free the allocated memory because we're skipping, so we don't run out of memory eventually. It's the opposite of malloc.
@@ -109,9 +109,10 @@ Product *add_product(const char *product_name, const int quantity, const int pri
     else
         products = new_product; // If there was no product before, now this one will be the beginning of our list.
     return append_product(new_product);
+}
 
 /* Write a new product to the end of the file. This more robust than writing the complete file every time but of course doesn't work for updates of exisitng products. */
-Product *append_product(const Product *new_product)
+Product *append_product(Product *new_product)
 {
     FILE *f = fopen(filename, "a+"); // Here we simply append a line at the end of the file. Note that this doesn't work for changes/updates.
     if (f == NULL)

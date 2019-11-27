@@ -35,6 +35,10 @@
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="product.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="product.h" />
 		<Unit filename="ui.c">
 			<Option compilerVar="CC" />
 		</Unit>
