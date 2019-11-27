@@ -19,17 +19,7 @@ int load_products()
     FILE *f = fopen(filename, "r");
     if (f == NULL) // Could not open the file.
     {
-        /* Opening the file did not work, so we create the admin user. */
-//        products = malloc(sizeof(Product)); // Create one user. In C, you always have to allocate memory before you can write to it. That's what malloc does.
-//        products->id = ++products_max_id; // Increment *before* assigning. Every user gets a unique ID number.
-//        strcpy(products->product_name, "banana"); // Here I'm simply copying the strings to the new product data structure.
-//        products->quantity;
-//        products->price;
-//        strcpy(products->location, "Cebu city");
-//        products->is_fruit = 1;
-//        products->next = NULL; // This is a pointer to the next user, creating a linked list of users. There is only one user here, so the "next" user is NULL.
-//        return 1; // Pretend we read one user.
-        return 0;
+        return 0; // If we can't read any products we just forget about them.
     }
     char buf[BUF_SIZE]; // We'll use this variable to load lines of our file into. C is not very convenient when it comes to strings, you have to do a lot of stuff by hand.
     Product *previous = NULL; // We keep track of the previous user we've read so we can set its "next" pointer later. This will become clearer further down.
@@ -41,7 +31,8 @@ int load_products()
             break; // ... so exit the loop.
         Product *u = malloc(sizeof(Product));
         u->next = NULL; // Initialize link in case this is the last one.
-        int rc = sscanf(buf, " %d,%31[^,\n],%d,%d,%255[^,\n],%d", &u->id, u->product_name, &u->quantity, &u->price, u->location, (int *) &u->is_fruit); // Read the various fields from the line in our buf variable.
+        int seller_id;
+        int rc = sscanf(buf, " %d,%d,%31[^,\n],%d,%d,%255[^,\n],%d", &u->id, &seller_id, u->product_name, &u->quantity, &u->price, u->location, (int *) &u->is_fruit); // Read the various fields from the line in our buf variable.
         if (rc != 5) // The number of fields read is in rc. This should be 5 unless it's somehow an invalid line. If it's invalid, simply skip it.
         {
             free(u); // Free the allocated memory because we're skipping, so we don't run out of memory eventually. It's the opposite of malloc.
@@ -76,7 +67,7 @@ int save_products()
     int count = 0; // Let's count the users.
     while (current != NULL) // while we have more, we loop.
     {
-        int written = fprintf(f, "%d,%s,%d,%d,%s,%d\n", current->id, current->product_name, current->quantity, current->price, current->location, current->is_fruit);
+        int written = fprintf(f, "%d,%d,%s,%d,%d,%s,%d\n", current->id, current->seller->id, current->product_name, current->quantity, current->price, current->location, current->is_fruit);
         if (written < 0 || written >= BUF_SIZE)
         {
             fclose(f); // We don't want dangling open files in case of an error.
@@ -90,7 +81,7 @@ int save_products()
     return count;
 }
 
-Product *add_product(const char *product_name, const int quantity, const int price, const char *location)
+Product *add_product(const User *seller, const char *product_name, const int quantity, const int price, const char *location)
 {
     /* First, we find the last user in the list. */
     Product *last = products;

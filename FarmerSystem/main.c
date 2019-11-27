@@ -7,9 +7,11 @@
 
 /* Declare functions before use. */
 void welcomeMessage();
-void logion_or_signup();
+void login_or_signup();
 void homePage();
-void newproduct();
+void newproduct_menu();
+void seller_menu();
+
 
 User *user = NULL; // This will be the logged in user.
 
@@ -72,7 +74,7 @@ void welcomeMessage()
     getch();
 }
 
-void logion_or_signup()
+void login_or_signup()
 {
     clear();
     headMessage("WHO ARE YOU?");
@@ -83,22 +85,15 @@ void logion_or_signup()
         {
         case 0:
             user = login();
-            if(user != NULL)
-            {
-                seller();
-            }
             break;
         case 1:
             user = signup();//If user name already exist should be error
-            if(user != NULL)
-            {
-                homePage();
-            }
             break;
         case 2:
             return;
         }
     }
+    return;
 }
 
 void homePage()
@@ -117,11 +112,11 @@ void homePage()
             // TODO
             break;
         case 1:
-            logion_or_signup();
-            // TODO
+            login_or_signup();
+            if (user != NULL) seller_menu();
             break;
         case 2:
-            logion_or_signup();
+            login_or_signup();
             // TODO
             break;
         case 3:
@@ -130,54 +125,48 @@ void homePage()
         }
     }
 }
-void seller()
+
+void seller_menu()
 {
     clear();
-    int sell = NULL;
-    headMessage("SELLER");
+    headMessage("SELLER MENU");
     const char *sellm[] = { "Add new product", "See product updates", "Exit", NULL};
-    while(sell == NULL)
+    switch(menu(sellm))
     {
-        switch(menu(sellm))
-        {
-        case 0:
-            newproduct();
-            //TODO
-            break;
-        case 1:
-            //TODO
-            break;
-        case 2:
-            return;
-            break;
-        }
+    case 0:
+        newproduct_menu();
+        //TODO
+        break;
+    case 1:
+        //TODO
+        break;
+    case 2:
+        return;
+        break;
     }
 }
-void newproduct()
+void newproduct_menu()
 {
     clear();
-    int sell = NULL;
     headMessage("PRODUCT TYPE");
     const char *sellm[] = { "Fruits", "Vegetables", "Others", "Back", NULL};
-    while(sell == NULL)
+    switch(menu(sellm))
     {
-        switch(menu(sellm))
-        {
-        case 0:
-            new_product();
-            //TODO
-            break;
-        case 1:
-            new_product();
-            //TODO
-            break;
-        case 2:
-            //TODO
-            break;
-        case 3:
-            return;
-            break;
-        }
+    case 0:
+        new_product(user);
+        //TODO
+        break;
+        break;
+    case 1:
+        new_product(user);
+        //TODO
+        break;
+    case 2:
+        //TODO
+        break;
+    case 3:
+        return;
+        break;
     }
 }
 

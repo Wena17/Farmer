@@ -123,7 +123,8 @@ User *signup()
     delwin(win);
     return user;
 }
-Product *new_product()
+
+Product *new_product(const User * user)
 {
     char product_name[256];
     int quantity;
@@ -150,7 +151,7 @@ Product *new_product()
     wmove(win, 4, 12);
     wclrtoeol(win); // Let's delete the password for security.
     wrefresh(win);
-    newproduct = add_product(product_name, quantity, price, location); // Now add and save the product, return the new id.
+    newproduct = add_product(user, product_name, quantity, price, location); // Now add and save the product, return the new id.
     if (newproduct == NULL) // Something went wrong.
     {
         mvwprintw(win, 6, 2, "Something went wrong. Press any key to continue.");
@@ -160,6 +161,6 @@ Product *new_product()
     wclear(win);
     wrefresh(win);
     delwin(win);
-    return seller();
+    return newproduct;
 }
 
