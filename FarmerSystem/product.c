@@ -33,12 +33,13 @@ int load_products()
         u->next = NULL; // Initialize link in case this is the last one.
         int seller_id;
         int rc = sscanf(buf, " %d,%d,%31[^,\n],%d,%d,%255[^,\n],%d", &u->id, &seller_id, u->product_name, &u->quantity, &u->price, u->location, (int *) &u->is_fruit); // Read the various fields from the line in our buf variable.
-        if (rc != 5) // The number of fields read is in rc. This should be 5 unless it's somehow an invalid line. If it's invalid, simply skip it.
+        if (rc != 7) // The number of fields read is in rc. This should be 5 unless it's somehow an invalid line. If it's invalid, simply skip it.
         {
             free(u); // Free the allocated memory because we're skipping, so we don't run out of memory eventually. It's the opposite of malloc.
             fprintf(stderr, "Skipping invalid line.\n"); // Be nice and print a notice.
             continue; // Loop around.
         }
+        u->seller = get_user(seller_id);
         /* At this point, we've read the fields of one line into the User in variable u. */
         if (previous == NULL) // This means we just read the first user.
             products = u; // So remember the start of the list in our global variable. Otherwise we'll never find it again.
@@ -120,4 +121,10 @@ Product *append_product(Product *new_product)
     }
     fclose(f); // We're done here.
     return new_product;
+}
+
+/* Give us the head of the list of products so we can go through them. */
+Product *get_products()
+{
+    return products;
 }

@@ -15,6 +15,7 @@ int load_users();
 int save_users();
 
 User *add_user(const char *user_name, const char *email, const char *pw_hash);
+User *get_user(const int id);
 
 User *check_password(const char *user_name, const char *pw_hash);
 

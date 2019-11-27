@@ -129,3 +129,16 @@ User *add_user(const char *user_name, const char *email, const char *pw_hash)
     fclose(f); // We're done here.
     return u;
 }
+
+User *get_user(const int id)
+{
+    User *current = users;
+    while (current != NULL)
+    {
+        if (current->id == id)
+            return current;
+        else
+            current = current->next;
+    }
+    return NULL;
+}

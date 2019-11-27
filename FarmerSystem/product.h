@@ -19,5 +19,6 @@ int load_products();
 int save_products();
 
 Product *add_product(const User *seller, const char *product_name, const int quantity, const int price, const char *location);
+Product *get_products();
 
 #endif // USER_H_INCLUDED

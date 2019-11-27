@@ -11,6 +11,7 @@ void login_or_signup();
 void homePage();
 void newproduct_menu();
 void seller_menu();
+void show_products();
 
 
 User *user = NULL; // This will be the logged in user.
@@ -18,6 +19,7 @@ User *user = NULL; // This will be the logged in user.
 int main()
 {
     load_users();
+    load_products();
     initscr(); // Initialize the curses library.
     int cursor_setting = curs_set(0);
     noecho(); // Typed characters are not automatically printed on the screen.
@@ -131,18 +133,20 @@ void seller_menu()
     clear();
     headMessage("SELLER MENU");
     const char *sellm[] = { "Add new product", "See product updates", "Exit", NULL};
-    switch(menu(sellm))
+    while (true)
     {
-    case 0:
-        newproduct_menu();
-        //TODO
-        break;
-    case 1:
-        //TODO
-        break;
-    case 2:
-        return;
-        break;
+        switch(menu(sellm))
+        {
+        case 0:
+            newproduct_menu();
+            //TODO
+            break;
+        case 1:
+            show_products();
+            break;
+        case 2:
+            return;
+        }
     }
 }
 void newproduct_menu()
@@ -155,7 +159,6 @@ void newproduct_menu()
     case 0:
         new_product(user);
         //TODO
-        break;
         break;
     case 1:
         new_product(user);
@@ -170,3 +173,22 @@ void newproduct_menu()
     }
 }
 
+void show_products()
+{
+    clear();
+    headMessage("PRODUCTS YOU ARE SELLING");
+    Product *current = get_products();
+    int line = 12;
+    while (current != NULL)
+    {
+        if (current->seller == user)
+        {
+            mvprintw(line++, 2, "%s %d %d %s", current->product_name, current->quantity, current->price, current->location);
+        }
+        current = current->next;
+    }
+    mvprintw(LINES - 1, 2, "Press any key");
+    refresh();
+    getch();
+    clear();
+}
