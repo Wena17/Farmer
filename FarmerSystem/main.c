@@ -80,7 +80,7 @@ void login_or_signup()
 {
     clear();
     headMessage("WHO ARE YOU?");
-    const char *solm[] = { "Login", "Sign up", "Quit", NULL };
+    const char *solm[] = { "Login", "Sign up", "Back", NULL };
     while (user == NULL)
     {
         switch (menu(solm))
@@ -93,6 +93,7 @@ void login_or_signup()
             break;
         case 2:
             return;
+            break;
         }
     }
     return;
@@ -102,7 +103,7 @@ void homePage()
 {
     clear();
     headMessage("HOMEPAGE");
-    const char *m[] = { "Admin", "Seller", "Buyer", "Quit", NULL }; // The NULL pointer marks the end of the list.
+    const char *m[] = { "Admin", "Seller", "Buyer", "Exit", NULL }; // The NULL pointer marks the end of the list.
     bool is_running = true;
     while (is_running)
     {
@@ -146,6 +147,7 @@ void seller_menu()
             break;
         case 2:
             return;
+            break;
         }
     }
 }
@@ -187,8 +189,23 @@ void show_products()
         }
         current = current->next;
     }
-    mvprintw(LINES - 1, 2, "Press any key");
-    refresh();
-    getch();
-    clear();
+    edit_products();
+
 }
+void edit_products()
+{
+    const char *produpdate[] = { "Edit", "Back", NULL};
+    while (true)
+    {
+        switch(menu(produpdate))
+        {
+        case 0:
+            newproduct_menu();
+            //TODO
+            break;
+        case 1:
+            seller_menu();
+        }
+    }
+}
+

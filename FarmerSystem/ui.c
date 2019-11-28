@@ -142,10 +142,10 @@ Product *new_product(const User * user)
     wrefresh(win);
     echo();
     curs_set(1);
-    mvwscanw(win, 2, 15, "%50s", product_name);
+    mvwscanw(win, 2, 15, "%50[^\n]", product_name);
     mvwscanw(win, 3, 15, "%d", &quantity);
     mvwscanw(win, 4, 15, "%d", &price);
-    mvwscanw(win, 5, 15, "%100s", location);
+    mvwscanw(win, 5, 15, "%100[^\n]", location);
     curs_set(0);
     noecho();
     wmove(win, 4, 12);
@@ -163,4 +163,42 @@ Product *new_product(const User * user)
     delwin(win);
     return newproduct;
 }
+/*void product_edit_screen()
+{
+    char product_name[21];
+    int quantity;
+    int price;
+    char location[256]
+    Product *product = NULL;
+    int width = COLS / 2;
+    int height = 8;
+    WINDOW *win = newwin(height, width, (LINES - height) / 2, (COLS - width) / 2);
+    wclear(win);
+    mvwprintw(win, 2, 2, "Product name: ");
+    mvwprintw(win, 3, 2, "Quantity: ");
+    mvwprintw(win, 4, 2, "Price: ");
+    mvwprintw(win, 5, 2, "Location: ");
+    wrefresh(win);
+    echo(); // Turn on echo so the user sees what they are typing.
+    curs_set(1); // Show the cursor so the user sees where they are typing.
+    mvwscanw(win, 2, 12, "%20s", user_name);
+    mvwscanw(win, 3, 12, "%50s", email);
+    mvwscanw(win, 4, 12, "%20s", pw_hash);
+    curs_set(0); // Hide the cursor again.
+    noecho(); // Don't show what the users types.
+    wmove(win, 4, 12);
+    wclrtoeol(win); // Let's delete the password for security.
+    wrefresh(win);
+    user = add_user(user_name, email, pw_hash); // Now add and save the user, return the new id.
+    if (user == NULL) // Something went wrong.
+    {
+        mvwprintw(win, 6, 2, "Something went wrong. Press any key to continue.");
+        wrefresh(win);
+        getch();
+    }
+    wclear(win);
+    wrefresh(win);
+    delwin(win);
+    return user;
+}*/
 

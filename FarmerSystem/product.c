@@ -19,6 +19,7 @@ int load_products()
     FILE *f = fopen(filename, "r");
     if (f == NULL) // Could not open the file.
     {
+        fprintf(stderr, "WARNING! Could not load product file.\n");
         return 0; // If we can't read any products we just forget about them.
     }
     char buf[BUF_SIZE]; // We'll use this variable to load lines of our file into. C is not very convenient when it comes to strings, you have to do a lot of stuff by hand.
@@ -36,7 +37,7 @@ int load_products()
         if (rc != 7) // The number of fields read is in rc. This should be 5 unless it's somehow an invalid line. If it's invalid, simply skip it.
         {
             free(u); // Free the allocated memory because we're skipping, so we don't run out of memory eventually. It's the opposite of malloc.
-            fprintf(stderr, "Skipping invalid line.\n"); // Be nice and print a notice.
+            fprintf(stderr, "WARNING! Skipping invalid line '%s'.\n", buf); // Be nice and print a notice.
             continue; // Loop around.
         }
         u->seller = get_user(seller_id);
@@ -90,6 +91,7 @@ Product *add_product(const User *seller, const char *product_name, const int qua
         last = last->next;
     Product *new_product = malloc(sizeof(Product));
     new_product->id = ++products_max_id; // Assign the next id, increment *before* assignment.
+    new_product->seller = seller;
     strcpy(new_product->product_name, product_name);
     new_product->quantity = quantity;
     new_product->price = price;
@@ -106,13 +108,18 @@ Product *add_product(const User *seller, const char *product_name, const int qua
 /* Write a new product to the end of the file. This more robust than writing the complete file every time but of course doesn't work for updates of exisitng products. */
 Product *append_product(Product *new_product)
 {
+    if (new_product == NULL || new_product->seller == NULL)
+    {
+        fprintf(stderr, "Trying to add NULL product or product with NULL seller.\n");
+        return NULL;
+    }
     FILE *f = fopen(filename, "a+"); // Here we simply append a line at the end of the file. Note that this doesn't work for changes/updates.
     if (f == NULL)
     {
         fprintf(stderr, "%s:%d Could not open file.\n", __FUNCTION__, __LINE__); // Print a nice error message with function name and line number.
         return NULL;
     }
-    int written = fprintf(f, "%d,%s,%d,%d,%s,%d \n", new_product->id, new_product->product_name, new_product->quantity, new_product->price, new_product->location, new_product->is_fruit);
+    int written = fprintf(f, "%d,%d,%s,%d,%d,%s,%d \n", new_product->id, new_product->seller->id, new_product->product_name, new_product->quantity, new_product->price, new_product->location, new_product->is_fruit);
     if (written < 0 || written >= BUF_SIZE)
     {
         fclose(f); // We don't want dangling open files in case of an error.
