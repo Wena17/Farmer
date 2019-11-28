@@ -4,11 +4,11 @@
 #include "user.h"
 #include "Product.h"
 
-int menu(const char **items);
+int menu(const int format, const char **items);
 
 User *login();
 User *signup();
 
-Product *new_product(const User * user);
+Product *new_product(User * user);
 
 #endif // UI_H_INCLUDED

@@ -7,10 +7,10 @@ typedef struct Product
 {
     unsigned int id;
     char product_name[32];
+    char product_type[50];
     int quantity;
     int price;
     char location[256];
-    bool is_fruit;
     struct User *seller;
     struct Product *next;
 } Product;
@@ -18,7 +18,7 @@ typedef struct Product
 int load_products();
 int save_products();
 
-Product *add_product(const User *seller, const char *product_name, const int quantity, const int price, const char *location);
+Product *add_product(User *seller, const char *product_type, const char *product_name, const int quantity, const int price, const char *location);
 Product *get_products();
 
 #endif // USER_H_INCLUDED

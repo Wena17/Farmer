@@ -12,6 +12,7 @@ void homePage();
 void newproduct_menu();
 void seller_menu();
 void show_products();
+void edit_product_menu();
 
 
 User *user = NULL; // This will be the logged in user.
@@ -83,7 +84,7 @@ void login_or_signup()
     const char *solm[] = { "Login", "Sign up", "Back", NULL };
     while (user == NULL)
     {
-        switch (menu(solm))
+        switch (menu(0, solm))
         {
         case 0:
             user = login();
@@ -107,7 +108,7 @@ void homePage()
     bool is_running = true;
     while (is_running)
     {
-        switch (menu(m))
+        switch (menu(0, m))
         {
         case 0:
             login();
@@ -131,12 +132,12 @@ void homePage()
 
 void seller_menu()
 {
-    clear();
-    headMessage("SELLER MENU");
     const char *sellm[] = { "Add new product", "See product updates", "Exit", NULL};
     while (true)
     {
-        switch(menu(sellm))
+        clear();
+        headMessage("SELLER MENU");
+        switch(menu(0, sellm))
         {
         case 0:
             newproduct_menu();
@@ -146,8 +147,7 @@ void seller_menu()
             show_products();
             break;
         case 2:
-            return;
-            break;
+            return; // User selected exit, so we return from this function to wherever we were before.
         }
     }
 }
@@ -156,7 +156,7 @@ void newproduct_menu()
     clear();
     headMessage("PRODUCT TYPE");
     const char *sellm[] = { "Fruits", "Vegetables", "Others", "Back", NULL};
-    switch(menu(sellm))
+    switch(menu(0, sellm))
     {
     case 0:
         new_product(user);
@@ -180,32 +180,34 @@ void show_products()
     clear();
     headMessage("PRODUCTS YOU ARE SELLING");
     Product *current = get_products();
-    int line = 12;
+    int line = 11;
+    int col = COLS / 4;
     while (current != NULL)
     {
         if (current->seller == user)
         {
-            mvprintw(line++, 2, "%s %d %d %s", current->product_name, current->quantity, current->price, current->location);
+            mvprintw(10, col, "Products \t\t\t Quantity \t Price \t\t Location");
+            mvprintw(line++, col, "%s \t\t %d \t\t %d \t\t %s", current->product_name, current->quantity, current->price, current->location);
         }
         current = current->next;
     }
-    edit_products();
+    edit_product_menu();
 
 }
-void edit_products()
+void edit_product_menu()
 {
     const char *produpdate[] = { "Edit", "Back", NULL};
-    while (true)
-    {
-        switch(menu(produpdate))
+
+        switch(menu(1, produpdate))
         {
         case 0:
-            newproduct_menu();
+            headMessage("UPDATING PRODUCTS");
+            product_edit_screen();
             //TODO
             break;
         case 1:
-            seller_menu();
+            show_products();
         }
-    }
+
 }
 

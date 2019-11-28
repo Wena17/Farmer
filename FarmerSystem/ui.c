@@ -6,8 +6,16 @@
 #include "user.h"
 #include "product.h"
 
-/* Show a menu with a null-pointer terminated list of items and return the index of the user's selection. */
-int menu(const char **items)
+int menu_centered(const int num_items, const int max_width, const char **items);
+int menu_compact(const int num_items, const int max_width, const char **items);
+
+/* Show a menu with a null-pointer terminated list of items and return the index of the user's selection.
+ *
+ * The format parameter can be:
+ *   0 - Centered on the screen
+ *   1 - Compact menu at the bootom of the screen.
+ */
+int menu(const int format, const char **items)
 {
     /* Determine the length of the longest menu item. */
     int num_items = 0;
@@ -25,6 +33,18 @@ int menu(const char **items)
     if (max_width < 18)
         max_width = 18; // Make sure the input prompt can be displayed.
 
+    switch (format)
+    {
+    case 0:
+        return menu_centered(num_items, max_width, items);
+    case 1:
+        return menu_compact(num_items, max_width, items);
+    }
+    return -1;
+}
+
+int menu_centered(const int num_items, const int max_width, const char **items)
+{
     /* Now calculate the starting position for the window. */
     const int start_col = (COLS - max_width) / 2;
     const int start_line = (LINES - num_items + 2) / 2;
@@ -46,6 +66,30 @@ int menu(const char **items)
     wclear(win); // Clear the window.
     wrefresh(win); // Display the changes.
     delwin(win); // Free up the window memory.
+    return choice;
+}
+
+int menu_compact(const int num_items, const int max_width, const char **items)
+{
+    int items_per_line = COLS / (max_width + 2);
+    int line = LINES - (num_items / COLS) - 2;
+    for (int i = 0; i < num_items; i++)
+    {
+        mvprintw(line + i / items_per_line, (max_width + 2) * (i % items_per_line), "%d) %s", i + 1, items[i]);
+    }
+    refresh();
+       int choice;
+    do
+    {
+        choice = getch() - '1'; // Neat way to translate the character to the zero-based index of the item.
+    }
+    while (choice < 0 || choice >= num_items);
+    for (int i = line; i < LINES; i++)
+    {
+        move(i, 0);
+        clrtoeol();
+    }
+    refresh();
     return choice;
 }
 
@@ -124,8 +168,9 @@ User *signup()
     return user;
 }
 
-Product *new_product(const User * user)
+Product *new_product(User * user)
 {
+    char product_type[256];
     char product_name[256];
     int quantity;
     int price;
@@ -151,7 +196,7 @@ Product *new_product(const User * user)
     wmove(win, 4, 12);
     wclrtoeol(win); // Let's delete the password for security.
     wrefresh(win);
-    newproduct = add_product(user, product_name, quantity, price, location); // Now add and save the product, return the new id.
+    newproduct = add_product(user, product_type, product_name, quantity, price, location); // Now add and save the product, return the new id.
     if (newproduct == NULL) // Something went wrong.
     {
         mvwprintw(win, 6, 2, "Something went wrong. Press any key to continue.");
@@ -163,34 +208,40 @@ Product *new_product(const User * user)
     delwin(win);
     return newproduct;
 }
-/*void product_edit_screen()
+
+void product_edit_screen()
 {
+    clear();
+    char product_type[30];
     char product_name[21];
     int quantity;
     int price;
-    char location[256]
-    Product *product = NULL;
+    char location[256];
+    // Product *product = NULL;
     int width = COLS / 2;
-    int height = 8;
+    int height = 12;
     WINDOW *win = newwin(height, width, (LINES - height) / 2, (COLS - width) / 2);
     wclear(win);
-    mvwprintw(win, 2, 2, "Product name: ");
-    mvwprintw(win, 3, 2, "Quantity: ");
-    mvwprintw(win, 4, 2, "Price: ");
-    mvwprintw(win, 5, 2, "Location: ");
+    mvwprintw(win, 2, 4, "Product type: ");
+    mvwprintw(win, 3, 4, "Product name: ");
+    mvwprintw(win, 4, 4, "Quantity: ");
+    mvwprintw(win, 5, 4, "Price: ");
+    mvwprintw(win, 6, 4, "Location: ");
     wrefresh(win);
     echo(); // Turn on echo so the user sees what they are typing.
     curs_set(1); // Show the cursor so the user sees where they are typing.
-    mvwscanw(win, 2, 12, "%20s", user_name);
-    mvwscanw(win, 3, 12, "%50s", email);
-    mvwscanw(win, 4, 12, "%20s", pw_hash);
+    mvwscanw(win, 2, 18, "%20[^\n]", product_type);
+    mvwscanw(win, 3, 18, "%20[^\n]", product_name);
+    mvwscanw(win, 4, 18, "%d", &quantity);
+    mvwscanw(win, 5, 18, "%d", &price);
+    mvwscanw(win, 6, 18, "%20[^\n]", location);
     curs_set(0); // Hide the cursor again.
     noecho(); // Don't show what the users types.
     wmove(win, 4, 12);
     wclrtoeol(win); // Let's delete the password for security.
     wrefresh(win);
-    user = add_user(user_name, email, pw_hash); // Now add and save the user, return the new id.
-    if (user == NULL) // Something went wrong.
+    int count = save_products();
+    if (count < 0) // Something went wrong.
     {
         mvwprintw(win, 6, 2, "Something went wrong. Press any key to continue.");
         wrefresh(win);
@@ -199,6 +250,5 @@ Product *new_product(const User * user)
     wclear(win);
     wrefresh(win);
     delwin(win);
-    return user;
-}*/
+}
 

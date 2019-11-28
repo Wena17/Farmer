@@ -33,7 +33,7 @@ int load_products()
         Product *u = malloc(sizeof(Product));
         u->next = NULL; // Initialize link in case this is the last one.
         int seller_id;
-        int rc = sscanf(buf, " %d,%d,%31[^,\n],%d,%d,%255[^,\n],%d", &u->id, &seller_id, u->product_name, &u->quantity, &u->price, u->location, (int *) &u->is_fruit); // Read the various fields from the line in our buf variable.
+        int rc = sscanf(buf, " %d,%d,%49[^,\n],%31[^,\n],%d,%d,%255[^,\n]", &u->id, &seller_id, u->product_type, u->product_name, &u->quantity, &u->price, u->location); // Read the various fields from the line in our buf variable.
         if (rc != 7) // The number of fields read is in rc. This should be 5 unless it's somehow an invalid line. If it's invalid, simply skip it.
         {
             free(u); // Free the allocated memory because we're skipping, so we don't run out of memory eventually. It's the opposite of malloc.
@@ -69,7 +69,7 @@ int save_products()
     int count = 0; // Let's count the users.
     while (current != NULL) // while we have more, we loop.
     {
-        int written = fprintf(f, "%d,%d,%s,%d,%d,%s,%d\n", current->id, current->seller->id, current->product_name, current->quantity, current->price, current->location, current->is_fruit);
+        int written = fprintf(f, "%d,%d,%s,%s,%d,%d,%s\n", current->id, current->seller->id, current->product_type, current->product_name, current->quantity, current->price, current->location);
         if (written < 0 || written >= BUF_SIZE)
         {
             fclose(f); // We don't want dangling open files in case of an error.
@@ -83,7 +83,7 @@ int save_products()
     return count;
 }
 
-Product *add_product(const User *seller, const char *product_name, const int quantity, const int price, const char *location)
+Product *add_product(User *seller, const char *product_type, const char *product_name, const int quantity, const int price, const char *location)
 {
     /* First, we find the last user in the list. */
     Product *last = products;
@@ -92,11 +92,11 @@ Product *add_product(const User *seller, const char *product_name, const int qua
     Product *new_product = malloc(sizeof(Product));
     new_product->id = ++products_max_id; // Assign the next id, increment *before* assignment.
     new_product->seller = seller;
+    //strcpy(new_product->product_type, product_product_type);
     strcpy(new_product->product_name, product_name);
     new_product->quantity = quantity;
     new_product->price = price;
     strcpy(new_product->location, location);
-    new_product->is_fruit = false;
     new_product->next = NULL; // Make sure the list is properly terminated.
     if (last != NULL) // Make sure there is a previous product at all.
         last->next = new_product; // Append to the list.
@@ -119,7 +119,7 @@ Product *append_product(Product *new_product)
         fprintf(stderr, "%s:%d Could not open file.\n", __FUNCTION__, __LINE__); // Print a nice error message with function name and line number.
         return NULL;
     }
-    int written = fprintf(f, "%d,%d,%s,%d,%d,%s,%d \n", new_product->id, new_product->seller->id, new_product->product_name, new_product->quantity, new_product->price, new_product->location, new_product->is_fruit);
+    int written = fprintf(f, "%d,%d,%s,%s,%d,%d,%s,%d \n", new_product->id, new_product->seller->id, new_product->product_type, new_product->product_name, new_product->quantity, new_product->price, new_product->location);
     if (written < 0 || written >= BUF_SIZE)
     {
         fclose(f); // We don't want dangling open files in case of an error.
