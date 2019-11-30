@@ -147,3 +147,34 @@ int get_product_count(const User *u)
     }
     return count;
 }
+
+void delete_product_from_index(const User *seller, const int index)
+{
+    Product *current = products;
+    Product *previous = NULL;
+    int i = 0;
+    while (current != NULL)
+    {
+        if (current->seller == seller) // If this product has the correct seller ...
+        {
+            if (index == i) // And the right index, we've found the item we are looking for.
+            {
+                if (previous != NULL) // If there is a previous product...
+                {
+                    previous->next = current->next; // .. then make this one's seccessor the next of the previous.
+                }
+                else // Otherwise this one is the first product ...
+                {
+                    products = current->next; // ... so move the head of the list to the next one.
+                }
+                free(current); // Free memory of the deleted product.
+                save_products();
+                return;
+            }
+            i++; // This product has the right seller but it has the wrong index, so count up.
+        }
+        previous = current;
+        current = current->next; // Got to the next product in the list.
+    }
+    // At this point, we haven't found a product with the right seller and the given index. We just return.
+}

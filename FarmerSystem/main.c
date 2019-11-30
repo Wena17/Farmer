@@ -15,6 +15,7 @@ void show_products();
 void edit_product_menu();
 void product_edit_screen();
 void show_users();
+char show_edit_menu();
 
 User *user = NULL; // This will be the logged in user.
 
@@ -53,7 +54,8 @@ void headMessage(const char *message)
     mvprintw(6, col, "*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*");
     printMessageCenter(7, message);
     mvprintw(8, col, "*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*");
-    if (user) mvprintw(0, 0, "%s", user->user_name);
+    if (user)
+        mvprintw(0, 0, "%s", user->user_name);
     refresh();
 }
 
@@ -112,7 +114,8 @@ void homePage()
         switch (menu(0, m))
         {
         case 0:
-            if (user == NULL) user = login();
+            if (user == NULL)
+                user = login();
             if(user->is_admin)
             {
                 show_users();
@@ -124,12 +127,14 @@ void homePage()
             }
             break;
         case 1:
-            if (user == NULL) login_or_signup(true);
+            if (user == NULL)
+                login_or_signup(true);
             if (user != NULL)
                 seller_menu();
             break;
         case 2:
-            if (user == NULL) login_or_signup(false);
+            if (user == NULL)
+                login_or_signup(false);
             // TODO
             break;
         case 3:
@@ -191,61 +196,116 @@ void show_products()
 {
     clear();
     headMessage("PRODUCTS YOU ARE SELLING");
-    Product *current = get_products();
-    int line = 11;
     int col = COLS / 4;
-    int i = 0;
+    int page = 0;
+    int selection = -1; // -1 means: Nothing is selected
     mvprintw(10, col, "Products \t\t\t Quantity \t Price \t\t Location");
-    while (current != NULL)
+    while(true)
     {
-        if (current->seller == user)
+        Product *current = get_products();
+        int line = 11;
+        int i = 0;
+        move(line, 0);
+        clrtobot();
+        while (current != NULL)
         {
-            mvprintw(line, col - 3, "%d", ++i);
-            mvprintw(line, col, "%s \t\t %d \t\t %d \t\t %s", current->product_name, current->quantity, current->price, current->location);
-            line++;
+            if (current->seller == user)
+            {
+                if (i >= 9 * page && i < 9 * (page + 1))
+                {
+                    mvprintw(line, col - 3, "%d", i + 1);
+                    mvprintw(line, col, "%s \t\t %d \t\t %d \t\t %s", current->product_name, current->quantity, current->price, current->location);
+                    clrtoeol();
+                    if (i == selection)
+                    {
+                        mvprintw(line, col - 15, "(Selected)");
+                    }
+                    line++;
+                }
+                i++;
+            }
+            current = current->next;
         }
-
-        current = current->next;
+        char c = show_edit_menu();
+        switch (c)
+        {
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            selection = page * 9 + c - '1';
+            break;
+        case '0':
+            return;
+        case ' ':
+            break;
+        case 'p':
+            page = page == 0 ? 0 : page - 1;
+            break;
+        case 'n':
+            page++;
+            break;
+        case 'd':
+            if (selection != -1)
+            {
+                delete_product_from_index(user, selection);
+                selection = -1;
+            }
+            break;
+        }
     }
-
-    edit_product_menu();
-
 }
 
-void edit_product_menu()
+char show_edit_menu()
 {
-    char produpdate;
-    int height = LINES / 2;
-    int col = COLS / 2;
-    mvprintw(height, col - 20, "e) Edit");
-    mvprintw(height, col - 10, "d) Delete");
-    mvprintw(height, col, "0) Back");
-    mvprintw(height + 3, col - 15, "Enter choice => ");
-    echo();
-    curs_set(1);
-    mvscanw(height + 3, col, "%c", &produpdate);
-
-    if(produpdate == 'e' || produpdate == 'E')
+    const int col = COLS / 4;
+    mvprintw(21, col, "e) Edit");
+    mvprintw(21, col + 9, "d) Delete");
+    mvprintw(21, col + 20, "p) Previous");
+    mvprintw(21, col + 33, "n) Next");
+    mvprintw(21, col + 41, "0) Back");
+    mvprintw(23, col, "Enter choice => ");
+    while (true)
     {
-        headMessage("UPDATING PRODUCTS");
-        product_edit_screen();
+        char c = getch();
+        switch (c)
+        {
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            return c;
+        case 'e':
+        case 'E':
+            headMessage("UPDATING PRODUCTS");
+            product_edit_screen();
+            return ' ';
+        case 'd':
+        case 'D':
+            return 'd';
+        case '0':
+            return '0';
+        case 'p':
+        case 'P':
+            return 'p';
+        case 'n':
+        case 'N':
+            return 'n';
+        default:
+            show_message("Invalid selection");
+            break;
+        }
     }
-    else if(produpdate == 'd' || produpdate == 'D')
-    {
-        //TODO
-    }
-    else if(produpdate == 'o')
-    {
-        return;
-    }
-    /*else
-    {
-        mvprintw(height + 6, col, "Invalid selection Press to try again");
-        getch();
-        refresh();
-        return edit_product_menu();
-    }*/
-
 }
 
 void show_users()
