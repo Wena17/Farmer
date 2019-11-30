@@ -1,6 +1,7 @@
 *.sqlite3
 *.csv
 *.save
+*.save-failed
 
 # Created by https://www.gitignore.io/api/codeblocks
 # Edit at https://www.gitignore.io/?templates=codeblocks
