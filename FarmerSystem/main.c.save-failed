@@ -7,7 +7,7 @@
 
 /* Declare functions before use. */
 void welcomeMessage();
-void login_or_signup(const bool is_seller);
+void login_or_signup();
 void homePage();
 void newproduct_menu();
 void seller_menu();
@@ -53,7 +53,6 @@ void headMessage(const char *message)
     mvprintw(6, col, "*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*");
     printMessageCenter(7, message);
     mvprintw(8, col, "*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*");
-    if (user) mvprintw(0, 0, "%s", user->user_name);
     refresh();
 }
 
@@ -79,7 +78,7 @@ void welcomeMessage()
     getch();
 }
 
-void login_or_signup(const bool is_seller)
+void login_or_signup()
 {
     clear();
     headMessage("WHAT'S NEXT?");
@@ -92,7 +91,7 @@ void login_or_signup(const bool is_seller)
             user = login();
             break;
         case 1:
-            user = signup(is_seller);//If user name already exist should be error
+            user = signup();//If user name already exist should be error
             break;
         case 2:
             exit(0);
@@ -112,24 +111,23 @@ void homePage()
         switch (menu(0, m))
         {
         case 0:
-            if (user == NULL) user = login();
+            user = login();
             if(user->is_admin)
             {
                 show_users();
             }
             else
             {
-                user = NULL;
                 show_message("No admin rights");
             }
             break;
         case 1:
-            if (user == NULL) login_or_signup(true);
+            login_or_signup();
             if (user != NULL)
                 seller_menu();
             break;
         case 2:
-            if (user == NULL) login_or_signup(false);
+            login_or_signup();
             // TODO
             break;
         case 3:
@@ -264,22 +262,10 @@ void show_users()
     {
         if (!u->is_admin)
         {
-            int count = get_product_count(u);
             mvprintw(line, col, "%d", u->id);
             mvprintw(line, col + 11, "%s", u->user_name);
-            clrtoeol();
             mvprintw(line, col + 22, "%s", u->email);
-            clrtoeol();
-            mvprintw(line, col + 33, "%d", count);
-            clrtoeol();
-            if (u->is_seller)
-            {
-                mvprintw(line, col + 44, "(Seller)");
-            }
-            else
-            {
-                mvprintw(line, col + 44, "(Buyer)");
-            }
+            mvprintw(line, col + 33, "%d", get_product_count(u));
             line++;
         }
         u = u->next;

@@ -8,13 +8,15 @@ typedef struct User
     char email[256];
     char pw_hash[256];
     bool is_admin;
+    bool is_seller;
     struct User *next;
 } User;
 
 int load_users();
 int save_users();
 
-User *add_user(const char *user_name, const char *email, const char *pw_hash);
+User *get_users();
+User *add_user(const char *user_name, const char *email, const char *pw_hash, const bool is_seller);
 User *get_user(const int id);
 
 User *check_password(const char *user_name, const char *pw_hash);

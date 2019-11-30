@@ -92,11 +92,11 @@ Product *add_product(User *seller, const char *product_type, const char *product
     Product *new_product = malloc(sizeof(Product));
     new_product->id = ++products_max_id; // Assign the next id, increment *before* assignment.
     new_product->seller = seller;
-    //strcpy(new_product->product_type, product_product_type);
-    strcpy(new_product->product_name, product_name);
-    new_product->quantity = quantity;
-    new_product->price = price;
-    strcpy(new_product->location, location);
+    strcpy(new_product->product_type, product_type); // Copy the product type string from the parameter into the product.
+    strcpy(new_product->product_name, product_name); // Same for the product name
+    new_product->quantity = quantity; // This is a simple int, we can just assign it.
+    new_product->price = price; // Same (we only consider full pesos.
+    strcpy(new_product->location, location); // Again a string that we need to copy.
     new_product->next = NULL; // Make sure the list is properly terminated.
     if (last != NULL) // Make sure there is a previous product at all.
         last->next = new_product; // Append to the list.
@@ -134,4 +134,16 @@ Product *append_product(Product *new_product)
 Product *get_products()
 {
     return products;
+}
+
+int get_product_count(const User *u)
+{
+    Product *current = products;
+    int count = 0;
+    while (current != NULL)
+    {
+        if (current->seller == u) count++;
+        current = current->next;
+    }
+    return count;
 }

@@ -24,6 +24,7 @@ int load_users()
         strcpy(users->email, "test@example.org"); // Same for the email.
         strcpy(users->pw_hash, "xyz"); // And finally the (unencrypted) password.
         users->is_admin = 1; // The first user is the admin. Everybody else will be admin=0.
+        users->is_seller = 0;
         users->next = NULL; // This is a pointer to the next user, creating a linked list of users. There is only one user here, so the "next" user is NULL.
         return 1; // Pretend we read one user.
     }
@@ -37,8 +38,8 @@ int load_users()
             break; // ... so exit the loop.
         User *u = malloc(sizeof(User)); // Allocate memory for one user. Again, we need to do the memory management by hand because we don't know the number of users in advance and C has no resizable arrays.
         u->next = NULL; // Initialize link in case this is the last one.
-        int rc = sscanf(buf, " %d,%31[^,\n],%255[^,\n],%255[^,\n],%d", &u->id, u->user_name, u->email, u->pw_hash, (int *) &u->is_admin); // Read the various fields from the line in our buf variable.
-        if (rc != 5) // The number of fields read is in rc. This should be 5 unless it's somehow an invalid line. If it's invalid, simply skip it.
+        int rc = sscanf(buf, " %d,%31[^,\n],%255[^,\n],%255[^,\n],%d,%d", &u->id, u->user_name, u->email, u->pw_hash, (int *) &u->is_admin, (int *) &u->is_seller); // Read the various fields from the line in our buf variable.
+        if (rc != 6) // The number of fields read is in rc. This should be 5 unless it's somehow an invalid line. If it's invalid, simply skip it.
         {
             free(u); // Free the allocated memory because we're skipping, so we don't run out of memory eventually. It's the opposite of malloc.
             fprintf(stderr, "Skipping invalid line.\n"); // Be nice and print a notice.
@@ -71,7 +72,7 @@ int save_users() {
     int count = 0; // Let's count the users.
     while (u != NULL) // while we have more, we loop.
     {
-        int written = fprintf(f, "%d,%s,%s,%s,%d\n", u->id, u->user_name, u->email, u->pw_hash, u->is_admin);
+        int written = fprintf(f, "%d,%s,%s,%s,%d,%d\n", u->id, u->user_name, u->email, u->pw_hash, u->is_admin, u->is_seller);
         if (written < 0 || written >= BUF_SIZE)
         {
             fclose(f); // We don't want dangling open files in case of an error.
@@ -99,7 +100,7 @@ User *check_password(const char *user_name, const char *pw_hash)
     return NULL; // We're at the end of the list and haven't found a match.
 }
 
-User *add_user(const char *user_name, const char *email, const char *pw_hash)
+User *add_user(const char *user_name, const char *email, const char *pw_hash, const bool is_seller)
 {
     /* First, we find the last user in the list. */
     User *last = users;
@@ -111,6 +112,7 @@ User *add_user(const char *user_name, const char *email, const char *pw_hash)
     strcpy(u->email, email);
     strcpy(u->pw_hash, pw_hash);
     u->is_admin = false;
+    u->is_seller = is_seller;
     u->next = NULL; // Make sure the list is properly terminated.
     last->next = u; // Append to the list.
     FILE *f = fopen(filename, "a+");
@@ -119,7 +121,7 @@ User *add_user(const char *user_name, const char *email, const char *pw_hash)
         fprintf(stderr, "%s:%d Could not open file.\n", __FUNCTION__, __LINE__); // Print a nice error message with function name and line number.
         return NULL;
     }
-    int written = fprintf(f, "%d,%s,%s,%s,%d\n", u->id, u->user_name, u->email, u->pw_hash, u->is_admin);
+    int written = fprintf(f, "%d,%s,%s,%s,%d,%d\n", u->id, u->user_name, u->email, u->pw_hash, u->is_admin, u->is_seller);
     if (written < 0 || written >= BUF_SIZE)
     {
         fclose(f); // We don't want dangling open files in case of an error.
@@ -141,4 +143,9 @@ User *get_user(const int id)
             current = current->next;
     }
     return NULL;
+}
+
+User *get_users()
+{
+    return users;
 }

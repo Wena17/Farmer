@@ -5,10 +5,11 @@
 #include "Product.h"
 
 int menu(const int format, const char **items);
+void show_message(char *msg);
 
 User *login();
-User *signup();
+User *signup(const bool is_seller);
 
-Product *new_product(User * user);
+Product *new_product(User *user, char *product_type);
 
 #endif // UI_H_INCLUDED

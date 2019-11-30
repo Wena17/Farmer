@@ -1,4 +1,3 @@
-
 #include <stdlib.h>
 #include <string.h>
 #include "curses.h"
@@ -95,8 +94,8 @@ int menu_compact(const int num_items, const int max_width, const char **items)
 
 User *login()
 {
-    char user_name[21];
-    char pass[11];
+    char user_name[30];
+    char pass[20];
     User *user = NULL;
     int width = COLS / 2;
     int height = 7;
@@ -131,7 +130,7 @@ User *login()
     return user;
 }
 
-User *signup()
+User *signup(const bool is_seller)
 {
     char user_name[21];
     char email[256];
@@ -155,7 +154,7 @@ User *signup()
     wmove(win, 4, 12);
     wclrtoeol(win); // Let's delete the password for security.
     wrefresh(win);
-    user = add_user(user_name, email, pw_hash); // Now add and save the user, return the new id.
+    user = add_user(user_name, email, pw_hash, is_seller); // Now add and save the user, return the new id.
     if (user == NULL) // Something went wrong.
     {
         mvwprintw(win, 6, 2, "Something went wrong. Press any key to continue.");
@@ -168,9 +167,8 @@ User *signup()
     return user;
 }
 
-Product *new_product(User * user)
+Product *new_product(User *user, char *product_type)
 {
-    char product_type[256];
     char product_name[256];
     int quantity;
     int price;
@@ -252,3 +250,15 @@ void product_edit_screen()
     delwin(win);
 }
 
+void show_message(char *msg)
+{
+    const char s[] = " - Press any key.";
+    int l = LINES - 1;
+    int c = (COLS - strlen(msg) - strlen(s)) / 2;
+    move(l, 0);
+    clrtoeol();
+    mvprintw(l, c, "%s%s", msg, s);
+    getch();
+    move(l, 0);
+    clrtoeol();
+}
