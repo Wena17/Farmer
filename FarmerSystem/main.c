@@ -20,6 +20,7 @@ void show_users();
 char show_edit_menu();
 char admin_menu();
 void display_user();
+void show_buyer_screen();
 
 User *user = NULL; // This will be the logged in user.
 
@@ -58,9 +59,8 @@ void headMessage(const char *message)
     mvprintw(6, col, "*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*");
     printMessageCenter(7, message);
     mvprintw(8, col, "*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*");
-    if (user)
-        mvprintw(0, 0, "User is %s", user->user_name);
     refresh();
+    display_user();
 }
 
 void welcomeMessage()
@@ -145,7 +145,8 @@ void homePage()
         case 2:
             if (user == NULL)
                 login_or_signup(false);
-            // TODO
+            if (user)
+                show_buyer_screen();
             break;
         case 3:
             exit(0);
@@ -466,7 +467,114 @@ void show_users()
 
 void display_user()
 {
-    mvprintw(0, 0, "                    ");
-    mvprintw(0, 0, "%s", user ? user->user_name : "Anonymous");
-    refresh();
+    static WINDOW *user_win = NULL;
+    if (!user_win) user_win = newwin(1, 20, 0, 0);
+    wclear(user_win);
+    mvwprintw(user_win, 0, 0, "%s", user ? user->user_name : "Anonymous");
+    wrefresh(user_win);
+}
+
+void show_buyer_screen()
+{
+    clear();
+    headMessage("AVAILABLE PRODUCTS");
+    int col = COLS / 4;
+    int page = 0;
+    Product *selected_product = NULL; // -1 means: Nothing is selected
+    Product *displayed_products[9];
+    mvprintw(10, col, "Seller");
+    mvprintw(10, col + 18, "Product type");
+    mvprintw(10, col + 36, "Products");
+    mvprintw(10, col + 54, "Quantity");
+    mvprintw(10, col + 72, "Price");
+    mvprintw(10, col + 80, "Location");
+    while(true)
+    {
+        for (int i = 0; i < 9; i++) displayed_products[i] = NULL;
+        Product *current = get_products();
+        int line = 12;
+        int i = 0;
+        move(line, 0);
+        clrtobot();
+        while (current != NULL)
+        {
+            if (i >= 9 * page && i < 9 * (page + 1))
+            {
+                displayed_products[i % 9] = current;
+                mvprintw(line, col - 10, "%d   =>", i % 9 + 1);
+                mvprintw(line, col, "%s", current->seller->user_name);
+                clrtoeol();
+                mvprintw(line, col, "%s", current->product_name);
+                clrtoeol();
+                mvprintw(line, col + 18, "%s", current->product_type);
+                clrtoeol();
+                mvprintw(line, col + 36, "%d", current->quantity);
+                clrtoeol();
+                mvprintw(line, col + 48, "%d", current->price);
+                clrtoeol();
+                mvprintw(line, col + 58, "%s", current->location);
+                clrtoeol();
+                if (current == selected_product)
+                {
+                    mvprintw(line, col - 15, "(Selected)");
+                }
+                line++;
+            }
+            i++;
+            current = current->next;
+        }
+        bool is_last_page = current == NULL;
+
+        mvprintw(LINES - 2, col - 3, "(b) Buy");
+        mvprintw(LINES - 2, col + 15, "(p) Previous");
+        mvprintw(LINES - 2, col + 35, "(n) Next");
+        mvprintw(LINES - 2, col + 50, "(0) Logout");
+        refresh();
+        char c = getch();
+        switch (tolower(c))
+        {
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            selected_product = displayed_products[c - '1'];
+            break;
+        case '0':
+            move(10,0);
+            clrtobot();
+            refresh();
+            user = NULL;
+            display_user();
+            return;
+        case 'p':
+            if (page == 0)
+                show_message("You're already on the first page.");
+            else
+                page--;
+            break;
+        case 'n':
+            if(is_last_page)
+            {
+                show_message("No Records Found");
+            }
+            else
+                page++;
+            break;
+        case 'b':
+            if (selected_product)
+            {
+                // TODO
+                selected_product = NULL;
+            }
+            break;
+        default:
+            show_message("Invalid selection");
+            break;
+        }
+    }
 }
