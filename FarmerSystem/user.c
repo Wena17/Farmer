@@ -187,3 +187,14 @@ int get_user_count()
     }
     return count;
 }
+
+User *get_user_by_id(int id)
+{
+
+    User *current = users;
+    while (current && current->id != id)
+    {
+        current = current->next;
+    }
+    return current;
+}

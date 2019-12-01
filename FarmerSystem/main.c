@@ -8,6 +8,7 @@
 #include "ui_buyer.h"
 #include "user.h"
 #include "login.h"
+#include "sales.h"
 
 /* Declare functions before use. */
 void welcomeMessage();
@@ -26,6 +27,7 @@ int main()
     login_init();
     load_users();
     load_products();
+    load_sales();
     initscr(); // Initialize the curses library.
     int cursor_setting = curs_set(0);
     noecho(); // Typed characters are not automatically printed on the screen.

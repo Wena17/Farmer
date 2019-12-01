@@ -23,5 +23,6 @@ Product *get_products();
 int get_product_count(const User *u);
 void delete_product_from_index(const User *seller, const int index);
 int product_reduce_quantity(Product *p, int q);
+Product *get_product_by_id(int id);
 
 #endif // USER_H_INCLUDED

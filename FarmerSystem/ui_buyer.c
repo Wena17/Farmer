@@ -6,6 +6,7 @@
 #include "ui.h"
 #include "product.h"
 #include "login.h"
+#include "sales.h"
 
 Product *products;
 
@@ -18,6 +19,7 @@ void pickup_product(const User *seller, Product *product)
     }
     else
     {
+        add_sale(product, get_logged_in_user(), 1, product->price);
         show_message("Sold. It's all yours now.");
     }
 }

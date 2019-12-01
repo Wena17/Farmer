@@ -216,3 +216,14 @@ int product_reduce_quantity(Product *p, int q)
     save_products();
     return p->quantity;
 }
+
+Product *get_product_by_id(int id)
+{
+
+    Product *current = products;
+    while (current && current->id != id)
+    {
+        current = current->next;
+    }
+    return current;
+}

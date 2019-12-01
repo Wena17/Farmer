@@ -26,4 +26,6 @@ User *check_password(const char *user_name, const char *pw_hash);
 
 int get_user_count();
 
+User *get_user_by_id(int id);
+
 #endif // USER_H_INCLUDED
