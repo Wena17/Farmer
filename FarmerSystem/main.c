@@ -5,11 +5,12 @@
 
 #include "curses.h"
 #include "ui.h"
+#include "ui_buyer.h"
 #include "user.h"
+#include "login.h"
 
 /* Declare functions before use. */
 void welcomeMessage();
-void login_or_signup(const bool is_seller);
 void homePage();
 void newproduct_menu();
 void seller_menu();
@@ -19,13 +20,10 @@ void product_edit_screen();
 void show_users();
 char show_edit_menu();
 char admin_menu();
-void display_user();
-void show_buyer_screen();
-
-User *user = NULL; // This will be the logged in user.
 
 int main()
 {
+    login_init();
     load_users();
     load_products();
     initscr(); // Initialize the curses library.
@@ -36,31 +34,7 @@ int main()
     curs_set(cursor_setting); // Back to normal.
     echo(); // Back to normal.
     endwin(); // Close the curses library.
-    save_users();
     return 0;
-}
-
-void printMessageCenter(const int l, const char *message)
-{
-    const int col = (COLS - strlen(message)) / 2; // COLS is the number of columns of the screen. Calculate column to center message.
-    mvprintw(l, col, "%s", message); // mvprintw is like printf() but with the row and column position where to start.
-}
-
-void headMessage(const char *message)
-{
-    clear(); // Clear the screen.
-    const char l[] = "°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°";
-    const int col = (COLS - strlen(l)) / 2; // Calculate the column to center the string.
-    mvprintw(0, col, "°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°");
-    mvprintw(1, col, "°                                                                         °");
-    mvprintw(2, col, "°                     Farmer's Cooperative Sales Platform                 °");
-    mvprintw(3, col, "°                                                                         °");
-    mvprintw(4, col, "°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°");
-    mvprintw(6, col, "*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*");
-    printMessageCenter(7, message);
-    mvprintw(8, col, "*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*");
-    refresh();
-    display_user();
 }
 
 void welcomeMessage()
@@ -85,30 +59,6 @@ void welcomeMessage()
     getch();
 }
 
-void login_or_signup(const bool is_seller)
-{
-    clear();
-    headMessage("WHAT'S NEXT?");
-    const char *solm[] = { "Login", "Sign up", "Exit", NULL };
-    while (user == NULL)
-    {
-        switch (menu(0, solm))
-        {
-        case 0:
-            user = login();
-            display_user();
-            break;
-        case 1:
-            user = signup(is_seller);//If user name already exist should be error
-            display_user();
-            break;
-        case 2:
-            exit(0);
-        }
-    }
-    return;
-}
-
 void homePage()
 {
     clear();
@@ -117,35 +67,28 @@ void homePage()
     bool is_running = true;
     while (is_running)
     {
-        switch (menu(0, m))
+        switch (menu(m))
         {
         case 0:
-            if (user == NULL)
-            {
-                user = login();
-                display_user();
-            }
-            if(user->is_admin)
+            login();
+            if (have_admin_rights())
             {
                 show_users();
             }
             else
             {
-                user = NULL;
-                display_user();
+                logout();
                 show_message("No admin rights");
             }
             break;
         case 1:
-            if (user == NULL)
-                login_or_signup(true);
-            if (user != NULL)
+            login_or_signup(true);
+            if (get_logged_in_user() != NULL)
                 seller_menu();
             break;
         case 2:
-            if (user == NULL)
-                login_or_signup(false);
-            if (user)
+            login_or_signup(false);
+            if (get_logged_in_user())
                 show_buyer_screen();
             break;
         case 3:
@@ -156,19 +99,19 @@ void homePage()
 
 void seller_menu()
 {
-    const char *sellm[] = { "Add new product", "See product updates", "Logout", NULL};
+    const char *sellm[] = { "Add new product", "See product updates", "Sold Products", "Logout", NULL};
     while (true)
     {
         clear();
         headMessage("SELLER MENU");
-        switch(menu(0, sellm))
+        switch(menu(sellm))
         {
         case 0:
             newproduct_menu();
             // TODO I wanted to do something here but I forgot what it is.
             break;
         case 1:
-            if(get_product_count(user) == 0)
+            if(get_product_count(get_logged_in_user()) == 0)
             {
                 show_message("No products, nothing to see here. Please move on.");
             }
@@ -178,8 +121,10 @@ void seller_menu()
             }
             break;
         case 2:
-            user = NULL;
-            display_user();
+            //TODO
+            break;
+        case 3:
+            logout();
             return;
         }
     }
@@ -189,21 +134,21 @@ void newproduct_menu()
     clear();
     headMessage("PRODUCT TYPE");
     const char *sellm[] = { "Fruits", "Vegetables", "Others", "Back", NULL};
-    switch(menu(0, sellm))
+    switch(menu(sellm))
     {
     case 0:
         headMessage("ADDING NEW PRODUCT FOR FRUITS");
-        new_product(user, "fruit");
+        new_product(get_logged_in_user(), "fruit");
         //TODO
         break;
     case 1:
         headMessage("ADDING NEW PRODUCT FOR VEGETABLES");
-        new_product(user, "vegetable");
+        new_product(get_logged_in_user(), "vegetable");
         break;
     case 2:
         headMessage("ADDING OTHER TYPE OF PRODUCT");
         // TODO
-        new_product(user, "other");
+        new_product(get_logged_in_user(), "other");
         break;
     case 3:
         return;
@@ -218,8 +163,8 @@ void show_products()
     int col = COLS / 4;
     int page = 0;
     int selection = -1; // -1 means: Nothing is selected
-    mvprintw(10, col, "Products");
-    mvprintw(10, col + 18, "Product type");
+    mvprintw(10, col, "Product type");
+    mvprintw(10, col + 18, "Products");
     mvprintw(10, col + 36, "Quantity");
     mvprintw(10, col + 48, "Price");
     mvprintw(10, col + 58, "Location");
@@ -232,14 +177,14 @@ void show_products()
         clrtobot();
         while (current != NULL)
         {
-            if (current->seller == user)
+            if (current->seller == get_logged_in_user())
             {
                 if (i >= 9 * page && i < 9 * (page + 1))
                 {
                     mvprintw(line, col - 10, "%d   =>", i + 1);
-                    mvprintw(line, col, "%s", current->product_name);
+                    mvprintw(line, col, "%s", current->product_type);
                     clrtoeol();
-                    mvprintw(line, col + 18, "%s", current->product_type);
+                    mvprintw(line, col + 18, "%s", current->product_name);
                     clrtoeol();
                     mvprintw(line, col + 36, "%d", current->quantity);
                     clrtoeol();
@@ -257,6 +202,7 @@ void show_products()
             }
             current = current->next;
         }
+        bool is_last_page = current == NULL;
         char c = show_edit_menu();
         switch (c)
         {
@@ -273,23 +219,47 @@ void show_products()
             break;
         case '0':
             return;
-        case ' ':
+        case 'e':
+            if (selection != -1)
+            {
+                headMessage("UPDATING PRODUCTS");
+                product_edit_screen();
+                selection = -1;
+            }
+            else
+            {
+                show_message("No product selected");
+            }
+
             break;
         case 'p':
-            page = page == 0 ? 0 : page - 1;
+            if (page == 0)
+            {
+                show_message("You're in the first page already.");
+                break;
+            }
+            page--;
             break;
         case 'n':
-            if(current == NULL)
+            if(is_last_page)
             {
-                show_message("No Records Found");
+                show_message("No more records.");
             }
-            page++;
+            else
+            {
+                page++;
+                selection = -1;
+            }
             break;
         case 'd':
             if (selection != -1)
             {
-                delete_product_from_index(user, selection);
+                delete_product_from_index(get_logged_in_user(), selection);
                 selection = -1;
+            }
+            else
+            {
+                show_message("No product selected.");
             }
             break;
         }
@@ -299,11 +269,11 @@ void show_products()
 char show_edit_menu()
 {
     const int col = COLS / 4;
-    mvprintw(24, col - 3, "e) Edit");
-    mvprintw(24, col + 10, "d) Delete");
-    mvprintw(24, col + 25, "p) Previous");
-    mvprintw(24, col + 38, "n) Next");
-    mvprintw(24, col + 55, "0) Back");
+    mvprintw(24, col - 3, "(e) Edit");
+    mvprintw(24, col + 10, "(d) Delete");
+    mvprintw(24, col + 25, "(p) Previous");
+    mvprintw(24, col + 38, "(n) Next");
+    mvprintw(24, col + 55, "(0) Back");
     while (true)
     {
         char c = getch();
@@ -321,9 +291,7 @@ char show_edit_menu()
             return c;
         case 'e':
         case 'E':
-            headMessage("UPDATING PRODUCTS");
-            product_edit_screen();
-            return ' ';
+            return 'e';
         case 'd':
         case 'D':
             return 'd';
@@ -418,8 +386,7 @@ void show_users()
         case '0':
             move(10, 0);
             clrtobot();
-            user = NULL;
-            display_user();
+            logout();
             return;
         case ' ':
             break;
@@ -465,116 +432,4 @@ void show_users()
 
 }
 
-void display_user()
-{
-    static WINDOW *user_win = NULL;
-    if (!user_win) user_win = newwin(1, 20, 0, 0);
-    wclear(user_win);
-    mvwprintw(user_win, 0, 0, "%s", user ? user->user_name : "Anonymous");
-    wrefresh(user_win);
-}
 
-void show_buyer_screen()
-{
-    clear();
-    headMessage("AVAILABLE PRODUCTS");
-    int col = COLS / 4;
-    int page = 0;
-    Product *selected_product = NULL; // -1 means: Nothing is selected
-    Product *displayed_products[9];
-    mvprintw(10, col, "Seller");
-    mvprintw(10, col + 18, "Product type");
-    mvprintw(10, col + 36, "Products");
-    mvprintw(10, col + 54, "Quantity");
-    mvprintw(10, col + 72, "Price");
-    mvprintw(10, col + 80, "Location");
-    while(true)
-    {
-        for (int i = 0; i < 9; i++) displayed_products[i] = NULL;
-        Product *current = get_products();
-        int line = 12;
-        int i = 0;
-        move(line, 0);
-        clrtobot();
-        while (current != NULL)
-        {
-            if (i >= 9 * page && i < 9 * (page + 1))
-            {
-                displayed_products[i % 9] = current;
-                mvprintw(line, col - 10, "%d   =>", i % 9 + 1);
-                mvprintw(line, col, "%s", current->seller->user_name);
-                clrtoeol();
-                mvprintw(line, col, "%s", current->product_name);
-                clrtoeol();
-                mvprintw(line, col + 18, "%s", current->product_type);
-                clrtoeol();
-                mvprintw(line, col + 36, "%d", current->quantity);
-                clrtoeol();
-                mvprintw(line, col + 48, "%d", current->price);
-                clrtoeol();
-                mvprintw(line, col + 58, "%s", current->location);
-                clrtoeol();
-                if (current == selected_product)
-                {
-                    mvprintw(line, col - 15, "(Selected)");
-                }
-                line++;
-            }
-            i++;
-            current = current->next;
-        }
-        bool is_last_page = current == NULL;
-
-        mvprintw(LINES - 2, col - 3, "(b) Buy");
-        mvprintw(LINES - 2, col + 15, "(p) Previous");
-        mvprintw(LINES - 2, col + 35, "(n) Next");
-        mvprintw(LINES - 2, col + 50, "(0) Logout");
-        refresh();
-        char c = getch();
-        switch (tolower(c))
-        {
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-            selected_product = displayed_products[c - '1'];
-            break;
-        case '0':
-            move(10,0);
-            clrtobot();
-            refresh();
-            user = NULL;
-            display_user();
-            return;
-        case 'p':
-            if (page == 0)
-                show_message("You're already on the first page.");
-            else
-                page--;
-            break;
-        case 'n':
-            if(is_last_page)
-            {
-                show_message("No Records Found");
-            }
-            else
-                page++;
-            break;
-        case 'b':
-            if (selected_product)
-            {
-                // TODO
-                selected_product = NULL;
-            }
-            break;
-        default:
-            show_message("Invalid selection");
-            break;
-        }
-    }
-}

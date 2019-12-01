@@ -1,6 +1,8 @@
 #ifndef USER_H_INCLUDED
 #define USER_H_INCLUDED
 
+#include <stdlib.h>
+
 typedef struct User
 {
     unsigned int id;

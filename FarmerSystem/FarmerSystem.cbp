@@ -32,6 +32,10 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<Unit filename="curses.h" />
+		<Unit filename="login.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="login.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -43,6 +47,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="ui.h" />
+		<Unit filename="ui_buyer.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="ui_buyer.h" />
 		<Unit filename="user.c">
 			<Option compilerVar="CC" />
 		</Unit>

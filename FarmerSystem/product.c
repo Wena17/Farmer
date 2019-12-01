@@ -142,10 +142,37 @@ int get_product_count(const User *u)
     int count = 0;
     while (current != NULL)
     {
-        if (current->seller == u) count++;
+        if (current->seller == u)
+            count++;
         current = current->next;
     }
     return count;
+}
+
+void delete_product(Product *p)
+{
+    Product *current = products;
+    Product *previous = NULL;
+    while (current != NULL)
+    {
+        if (current == p) // And the right index, we've found the item we are looking for.
+        {
+            if (previous != NULL) // If there is a previous product...
+            {
+                previous->next = current->next; // .. then make this one's seccessor the next of the previous.
+            }
+            else // Otherwise this one is the first product ...
+            {
+                products = current->next; // ... so move the head of the list to the next one.
+            }
+            free(current); // Free memory of the deleted product.
+            save_products();
+            return;
+        }
+        previous = current;
+        current = current->next; // Got to the next product in the list.
+    }
+    // At this point, we haven't found a product with the right seller and the given index. We just return.
 }
 
 void delete_product_from_index(const User *seller, const int index)
@@ -177,4 +204,15 @@ void delete_product_from_index(const User *seller, const int index)
         current = current->next; // Got to the next product in the list.
     }
     // At this point, we haven't found a product with the right seller and the given index. We just return.
+}
+
+/* Reduces the quantity of the given product be the given amount.
+ * If the amount is larger than the rmaining stock return -1, otherwise return the remaining quantity.
+ */
+int product_reduce_quantity(Product *p, int q)
+{
+    if (p->quantity < q) return -1;
+    p->quantity -= q;
+    save_products();
+    return p->quantity;
 }

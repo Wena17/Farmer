@@ -22,5 +22,6 @@ Product *add_product(User *seller, const char *product_type, const char *product
 Product *get_products();
 int get_product_count(const User *u);
 void delete_product_from_index(const User *seller, const int index);
+int product_reduce_quantity(Product *p, int q);
 
 #endif // USER_H_INCLUDED
