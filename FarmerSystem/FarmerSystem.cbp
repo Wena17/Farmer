@@ -55,6 +55,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="ui_buyer.h" />
+		<Unit filename="ui_seller.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="ui_seller.h" />
 		<Unit filename="user.c">
 			<Option compilerVar="CC" />
 		</Unit>

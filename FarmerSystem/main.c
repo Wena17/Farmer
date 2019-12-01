@@ -123,7 +123,7 @@ void seller_menu()
             }
             break;
         case 2:
-            //TODO
+            show_sales_for_seller();
             break;
         case 3:
             logout();

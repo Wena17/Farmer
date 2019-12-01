@@ -90,11 +90,10 @@ int save_sales()
     return count;
 }
 
-Sale *get_sales();
-
-Sale *get_sales_for_seller(const User *seller);
-
-Sale *get_sales_for_buyer(const User *buyer);
+Sale *get_sales()
+{
+    return sales;
+}
 
 int add_sale(Product *product, User *buyer, int quantity, int price)
 {
