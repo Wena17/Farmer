@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+
 #include "curses.h"
 #include "ui.h"
 #include "user.h"
@@ -17,6 +19,7 @@ void product_edit_screen();
 void show_users();
 char show_edit_menu();
 char admin_menu();
+void display_user();
 
 User *user = NULL; // This will be the logged in user.
 
@@ -93,9 +96,11 @@ void login_or_signup(const bool is_seller)
         {
         case 0:
             user = login();
+            display_user();
             break;
         case 1:
             user = signup(is_seller);//If user name already exist should be error
+            display_user();
             break;
         case 2:
             exit(0);
@@ -116,7 +121,10 @@ void homePage()
         {
         case 0:
             if (user == NULL)
+            {
                 user = login();
+                display_user();
+            }
             if(user->is_admin)
             {
                 show_users();
@@ -124,6 +132,7 @@ void homePage()
             else
             {
                 user = NULL;
+                display_user();
                 show_message("No admin rights");
             }
             break;
@@ -155,14 +164,22 @@ void seller_menu()
         {
         case 0:
             newproduct_menu();
-            //TODO
+            // TODO I wanted to do something here but I forgot what it is.
             break;
         case 1:
-            show_products();
+            if(get_product_count(user) == 0)
+            {
+                show_message("No products, nothing to see here. Please move on.");
+            }
+            else
+            {
+                show_products();
+            }
             break;
         case 2:
             user = NULL;
-            homePage();
+            display_user();
+            return;
         }
     }
 }
@@ -261,6 +278,10 @@ void show_products()
             page = page == 0 ? 0 : page - 1;
             break;
         case 'n':
+            if(current == NULL)
+            {
+                show_message("No Records Found");
+            }
             page++;
             break;
         case 'd':
@@ -277,11 +298,11 @@ void show_products()
 char show_edit_menu()
 {
     const int col = COLS / 4;
-    mvprintw(21, col - 3, "e) Edit");
-    mvprintw(21, col + 10, "d) Delete");
-    mvprintw(21, col + 25, "p) Previous");
-    mvprintw(21, col + 38, "n) Next");
-    mvprintw(21, col + 55, "0) Back");
+    mvprintw(24, col - 3, "e) Edit");
+    mvprintw(24, col + 10, "d) Delete");
+    mvprintw(24, col + 25, "p) Previous");
+    mvprintw(24, col + 38, "n) Next");
+    mvprintw(24, col + 55, "0) Back");
     while (true)
     {
         char c = getch();
@@ -329,7 +350,6 @@ void show_users()
     User *selected_user = NULL; // Here we store the current selection or NULL if nothing is seletec.
     User *displayed_users[9]; // Here we remember which user is displayed at which position on the screen.
     mvprintw(10, col - 10, "No.");
-    mvprintw(10, col, "Seller ID");
     mvprintw(10, col + 15, "Name");
     mvprintw(10, col + 30, "Email");
     mvprintw(10, col + 60, "Products");
@@ -338,7 +358,8 @@ void show_users()
         int line = 12; // Display always starts at line 12.
         move(line, 0);
         clrtobot();
-        for (int i = 0; i < 9; i++) displayed_users[i] = NULL; // Erase the array of displayed users.
+        for (int i = 0; i < 9; i++)
+            displayed_users[i] = NULL; // Erase the array of displayed users.
         User *current = get_users(); // Get the start of the list of users.
         int i = 0; // Variable for counting.
         while (current != NULL && i < 9 * (page + 1)) // Only need to loop until the last user that is on the current page.
@@ -349,7 +370,6 @@ void show_users()
                 {
                     displayed_users[i % 9] = current; // Now remember we are displaying the current user at the current position.
                     mvprintw(line, col - 10, "%d   =>", i % 9 + 1);
-                    mvprintw(line, col, "%d", current->id);
                     mvprintw(line, col + 15, "%s", current->user_name);
                     clrtoeol();
                     mvprintw(line, col + 30, "%s", current->email);
@@ -374,8 +394,14 @@ void show_users()
             }
             current = current->next;
         }
-        char c = admin_menu();
-        switch (c)
+        bool is_last_page = current == NULL;
+        const int col = COLS / 4;
+        mvprintw(24, col - 3, "(d) Delete");
+        mvprintw(24, col + 15, "(p) Previous");
+        mvprintw(24, col + 35, "(n) Next");
+        mvprintw(24, col + 50, "(0) Logout");
+        char c = getch();
+        switch (tolower(c))
         {
         case '1':
         case '2':
@@ -389,17 +415,32 @@ void show_users()
             selected_user = displayed_users[c - '1'];
             break;
         case '0':
+            move(10, 0);
+            clrtobot();
             user = NULL;
-            homePage();
+            display_user();
+            return;
         case ' ':
             break;
         case 'p':
-            page = page == 0 ? 0 : page - 1;
+            if (page == 0)
+            {
+                show_message("You're in the first page already.");
+                break;
+            }
+            page--;
             selected_user = NULL; // We've changed the page, so unselect any selection.
             break;
         case 'n':
-            page++;
-            selected_user = NULL; // We've changed the page, so unselect.
+            if(is_last_page)
+            {
+                show_message("No more records.");
+            }
+            else
+            {
+                page++;
+                selected_user = NULL; // We've changed the page, so unselect.
+            }
             break;
         case 'd':
             if (selected_user)
@@ -415,49 +456,17 @@ void show_users()
                 }
             }
             break;
-        }
-    }
-
-}
-
-char admin_menu()
-{
-    const int col = COLS / 4;
-    mvprintw(21, col - 3, "(d) Delete");
-    mvprintw(21, col + 15, "(p) Previous");
-    mvprintw(21, col + 35, "(n) Next");
-    mvprintw(21, col + 50, "(0) Logout");
-    while (true)
-    {
-        char c = getch();
-        switch (c)
-        {
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-            return c;
-        case 'd':
-        case 'D':
-            return 'd';
-        case '0':
-            return '0';
-        case 'p':
-        case 'P':
-            return 'p';
-        case 'n':
-        case 'N':
-            return 'n';
         default:
-            show_message("Invalid selection");
+            show_message("Invalid selection.");
             break;
         }
     }
+
 }
 
-
+void display_user()
+{
+    mvprintw(0, 0, "                    ");
+    mvprintw(0, 0, "%s", user ? user->user_name : "Anonymous");
+    refresh();
+}
