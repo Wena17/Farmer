@@ -16,6 +16,7 @@ void edit_product_menu();
 void product_edit_screen();
 void show_users();
 char show_edit_menu();
+char admin_menu();
 
 User *user = NULL; // This will be the logged in user.
 
@@ -55,7 +56,7 @@ void headMessage(const char *message)
     printMessageCenter(7, message);
     mvprintw(8, col, "*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*");
     if (user)
-        mvprintw(0, 0, "%s", user->user_name);
+        mvprintw(0, 0, "User is %s", user->user_name);
     refresh();
 }
 
@@ -199,11 +200,15 @@ void show_products()
     int col = COLS / 4;
     int page = 0;
     int selection = -1; // -1 means: Nothing is selected
-    mvprintw(10, col, "Products \t\t\t Quantity \t Price \t\t Location");
+    mvprintw(10, col, "Products");
+    mvprintw(10, col + 18, "Product type");
+    mvprintw(10, col + 36, "Quantity");
+    mvprintw(10, col + 48, "Price");
+    mvprintw(10, col + 58, "Location");
     while(true)
     {
         Product *current = get_products();
-        int line = 11;
+        int line = 12;
         int i = 0;
         move(line, 0);
         clrtobot();
@@ -213,8 +218,16 @@ void show_products()
             {
                 if (i >= 9 * page && i < 9 * (page + 1))
                 {
-                    mvprintw(line, col - 3, "%d", i + 1);
-                    mvprintw(line, col, "%s \t\t %d \t\t %d \t\t %s", current->product_name, current->quantity, current->price, current->location);
+                    mvprintw(line, col - 10, "%d   =>", i + 1);
+                    mvprintw(line, col, "%s", current->product_name);
+                    clrtoeol();
+                    mvprintw(line, col + 18, "%s", current->product_type);
+                    clrtoeol();
+                    mvprintw(line, col + 36, "%d", current->quantity);
+                    clrtoeol();
+                    mvprintw(line, col + 48, "%d", current->price);
+                    clrtoeol();
+                    mvprintw(line, col + 58, "%s", current->location);
                     clrtoeol();
                     if (i == selection)
                     {
@@ -264,12 +277,11 @@ void show_products()
 char show_edit_menu()
 {
     const int col = COLS / 4;
-    mvprintw(21, col, "e) Edit");
-    mvprintw(21, col + 9, "d) Delete");
-    mvprintw(21, col + 20, "p) Previous");
-    mvprintw(21, col + 33, "n) Next");
-    mvprintw(21, col + 41, "0) Back");
-    mvprintw(23, col, "Enter choice => ");
+    mvprintw(21, col - 3, "e) Edit");
+    mvprintw(21, col + 10, "d) Delete");
+    mvprintw(21, col + 25, "p) Previous");
+    mvprintw(21, col + 38, "n) Next");
+    mvprintw(21, col + 55, "0) Back");
     while (true)
     {
         char c = getch();
@@ -311,41 +323,141 @@ char show_edit_menu()
 void show_users()
 {
     clear();
-    headMessage("SELLER");
-    User *u = get_users();
-    int line = 11;
+    headMessage("USERS");
     int col = COLS / 4;
-    // int i = 0;
+    int page = 0;
+    User *selected_user = NULL; // Here we store the current selection or NULL if nothing is seletec.
+    User *displayed_users[9]; // Here we remember which user is displayed at which position on the screen.
+    mvprintw(10, col - 10, "No.");
     mvprintw(10, col, "Seller ID");
-    mvprintw(10, col + 11, "Name");
-    mvprintw(10, col + 22, "Email");
-    mvprintw(10, col + 33, "Products");
-    while (u != NULL)
+    mvprintw(10, col + 15, "Name");
+    mvprintw(10, col + 30, "Email");
+    mvprintw(10, col + 60, "Products");
+    while(true)
     {
-        if (!u->is_admin)
+        int line = 12; // Display always starts at line 12.
+        move(line, 0);
+        clrtobot();
+        for (int i = 0; i < 9; i++) displayed_users[i] = NULL; // Erase the array of displayed users.
+        User *current = get_users(); // Get the start of the list of users.
+        int i = 0; // Variable for counting.
+        while (current != NULL && i < 9 * (page + 1)) // Only need to loop until the last user that is on the current page.
         {
-            int count = get_product_count(u);
-            mvprintw(line, col, "%d", u->id);
-            mvprintw(line, col + 11, "%s", u->user_name);
-            clrtoeol();
-            mvprintw(line, col + 22, "%s", u->email);
-            clrtoeol();
-            mvprintw(line, col + 33, "%d", count);
-            clrtoeol();
-            if (u->is_seller)
+            if (!current->is_admin) // Only display users who are not admins.
             {
-                mvprintw(line, col + 44, "(Seller)");
+                if (i >= 9 * page && i < 9 * (page + 1)) // Check if the current user should be displayed on the current page.
+                {
+                    displayed_users[i % 9] = current; // Now remember we are displaying the current user at the current position.
+                    mvprintw(line, col - 10, "%d   =>", i % 9 + 1);
+                    mvprintw(line, col, "%d", current->id);
+                    mvprintw(line, col + 15, "%s", current->user_name);
+                    clrtoeol();
+                    mvprintw(line, col + 30, "%s", current->email);
+                    clrtoeol();
+                    if (current->is_seller)
+                    {
+                        mvprintw(line, col + 60, "%d", get_product_count(current));
+                        clrtoeol();
+                        mvprintw(line, col + 70, "(Seller)");
+                    }
+                    else
+                    {
+                        mvprintw(line, col + 70, "(Buyer)");
+                    }
+                    if (current == selected_user)
+                    {
+                        mvprintw(line, col - 15, "(Selected)");
+                    }
+                    line++; // Go to next line in the table.
+                }
+                i++; // Wether this user is on this page or not, count up.
             }
-            else
-            {
-                mvprintw(line, col + 44, "(Buyer)");
-            }
-            line++;
+            current = current->next;
         }
-        u = u->next;
+        char c = admin_menu();
+        switch (c)
+        {
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            selected_user = displayed_users[c - '1'];
+            break;
+        case '0':
+            user = NULL;
+            homePage();
+        case ' ':
+            break;
+        case 'p':
+            page = page == 0 ? 0 : page - 1;
+            selected_user = NULL; // We've changed the page, so unselect any selection.
+            break;
+        case 'n':
+            page++;
+            selected_user = NULL; // We've changed the page, so unselect.
+            break;
+        case 'd':
+            if (selected_user)
+            {
+                if (get_product_count(selected_user))
+                {
+                    show_message("You can't delete a seller with active products.");
+                }
+                else
+                {
+                    delete_user(selected_user);
+                    selected_user = NULL;
+                }
+            }
+            break;
+        }
     }
-    refresh();
-    getch();
+
+}
+
+char admin_menu()
+{
+    const int col = COLS / 4;
+    mvprintw(21, col - 3, "(d) Delete");
+    mvprintw(21, col + 15, "(p) Previous");
+    mvprintw(21, col + 35, "(n) Next");
+    mvprintw(21, col + 50, "(0) Logout");
+    while (true)
+    {
+        char c = getch();
+        switch (c)
+        {
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            return c;
+        case 'd':
+        case 'D':
+            return 'd';
+        case '0':
+            return '0';
+        case 'p':
+        case 'P':
+            return 'p';
+        case 'n':
+        case 'N':
+            return 'n';
+        default:
+            show_message("Invalid selection");
+            break;
+        }
+    }
 }
 
 

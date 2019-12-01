@@ -18,7 +18,10 @@ int save_users();
 User *get_users();
 User *add_user(const char *user_name, const char *email, const char *pw_hash, const bool is_seller);
 User *get_user(const int id);
+void delete_user(User *user);
 
 User *check_password(const char *user_name, const char *pw_hash);
+
+int get_user_count();
 
 #endif // USER_H_INCLUDED

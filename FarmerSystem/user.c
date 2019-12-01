@@ -149,3 +149,41 @@ User *get_users()
 {
     return users;
 }
+
+void delete_user(User *user)
+{
+    User *current = users;
+    User *previous = NULL;
+    while (current)
+    {
+            if (current == user) // If we have found the user to delete, we delete it.
+            {
+                if (previous) // If there is a previous user, then remove this one from the list.
+                {
+                    previous->next = current->next; // .. then make this one's seccessor the next of the previous.
+                }
+                else // Otherwise this one is the first in the list.
+                {
+                    users = current->next; // ... so move the head of the list to the next one.
+                }
+                free(current); // Free memory of the deleted user.
+                save_users(); // Save our changes to disk.
+                return;
+            }
+        previous = current;
+        current = current->next; // Got to the next product in the list.
+    }
+    fprintf(stderr, "%s:%d WARNING: Deleting user that was not in the list.", __FUNCTION__, __LINE__);
+}
+
+int get_user_count()
+{
+    User *current = users;
+    int count = 0;
+    while (current)
+    {
+        count++;
+        current = current->next;
+    }
+    return count;
+}
