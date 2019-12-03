@@ -11,10 +11,10 @@ void show_sales_for_seller()
     clear();
     headMessage("ALL YOUR SALES");
     int page = 0;
-    mvprintw(10, 2, "Product");
-    mvprintw(10, 24, "Buyer Name");
-    mvprintw(10, 46, "Quantity");
-    mvprintw(10, 56, "Price");
+    mvprintw(10, 24, "Product");
+    mvprintw(10, 44, "Buyer Name");
+    mvprintw(10, 59, "Quantity");
+    mvprintw(10, 75, "Price");
     while(true)
     {
         Sale *current = get_sales();
@@ -28,13 +28,13 @@ void show_sales_for_seller()
             {
                 if (i >= 9 * page && i < 9 * (page + 1))
                 {
-                    mvprintw(line, 2, "%s", current->product->product_name);
+                    mvprintw(line, 24, "%s", current->product->product_name);
                     clrtoeol();
-                    mvprintw(line, 24, "%s", current->buyer->user_name);
+                    mvprintw(line, 44, "%s", current->buyer->user_name);
                     clrtoeol();
-                    mvprintw(line, 46, "%d", current->quantity);
+                    mvprintw(line, 59, "%d", current->quantity);
                     clrtoeol();
-                    mvprintw(line, 56, "%d", current->price);
+                    mvprintw(line, 75, "%d", current->price);
                     clrtoeol();
                     line++;
                 }
@@ -44,9 +44,9 @@ void show_sales_for_seller()
         }
         bool is_last_page = current == NULL;
 
-        mvprintw(LINES - 2, 15, "(p) Previous");
-        mvprintw(LINES - 2, 35, "(n) Next");
-        mvprintw(LINES - 2, 50, "(0) Back");
+        mvprintw(LINES - 2, 30, "(p) Previous");
+        mvprintw(LINES - 2, 50, "(n) Next");
+        mvprintw(LINES - 2, 70, "(0) Back");
         refresh();
         char c = getch();
         switch (tolower(c))

@@ -47,11 +47,13 @@ bool login_or_signup(const bool is_seller)
 
  bool login()
 {
+    headMessage("LOGIN");
     if (user) return true;
     char user_name[30];
     char pass[20];
     int width = COLS / 2;
     int height = 7;
+    int i = 0;
     WINDOW *win = newwin(height, width, (LINES - height) / 2, (COLS - width) / 2);
     wclear(win);
     mvwprintw(win, 2, 2, "Username: ");
@@ -74,6 +76,12 @@ bool login_or_signup(const bool is_seller)
             wmove(win, 3, 12);
             wclrtoeol(win);
             wrefresh(win);
+            i++;
+        }
+        if(i >= 3)
+        {
+            show_message("You've reach the times to login.");
+            return;
         }
     }
     while (user == NULL);
@@ -86,6 +94,7 @@ bool login_or_signup(const bool is_seller)
 
 bool signup(const bool is_seller)
 {
+    headMessage("SIGN UP");
     if (user) return true;
     char user_name[21];
     char email[256];
@@ -102,7 +111,7 @@ bool signup(const bool is_seller)
     echo(); // Turn on echo so the user sees what they are typing.
     curs_set(1); // Show the cursor so the user sees where they are typing.
     mvwscanw(win, 2, 12, "%20s", user_name);
-    mvwscanw(win, 3, 12, "%50s", email);
+    mvwscanw(win, 3, 12, "%s", email);
     mvwscanw(win, 4, 12, "%20s", pw_hash);
     curs_set(0); // Hide the cursor again.
     noecho(); // Don't show what the users types.
@@ -132,6 +141,7 @@ void logout()
 {
     user = NULL;
     display_user();
+    refresh();
 }
 
 bool have_admin_rights()

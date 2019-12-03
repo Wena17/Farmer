@@ -6,9 +6,11 @@
 #include "curses.h"
 #include "ui.h"
 #include "ui_buyer.h"
+#include "ui_seller.h"
 #include "user.h"
 #include "login.h"
 #include "sales.h"
+
 
 /* Declare functions before use. */
 void welcomeMessage();
@@ -63,7 +65,6 @@ void welcomeMessage()
 
 void homePage()
 {
-    clear();
     headMessage("HOMEPAGE");
     const char *m[] = { "Admin", "Seller", "Buyer", "Exit", NULL }; // The NULL pointer marks the end of the list.
     bool is_running = true;
@@ -141,7 +142,6 @@ void newproduct_menu()
     case 0:
         headMessage("ADDING NEW PRODUCT FOR FRUITS");
         new_product(get_logged_in_user(), "fruit");
-        //TODO
         break;
     case 1:
         headMessage("ADDING NEW PRODUCT FOR VEGETABLES");
@@ -271,11 +271,11 @@ void show_products()
 char show_edit_menu()
 {
     const int col = COLS / 4;
-    mvprintw(24, col - 3, "(e) Edit");
-    mvprintw(24, col + 10, "(d) Delete");
-    mvprintw(24, col + 25, "(p) Previous");
-    mvprintw(24, col + 38, "(n) Next");
-    mvprintw(24, col + 55, "(0) Back");
+    mvprintw(LINES - 2, col - 3, "(e) Edit");
+    mvprintw(LINES - 2, col + 10, "(d) Delete");
+    mvprintw(LINES - 2, col + 25, "(p) Previous");
+    mvprintw(LINES - 2, col + 38, "(n) Next");
+    mvprintw(LINES - 2, col + 55, "(0) Back");
     while (true)
     {
         char c = getch();
@@ -367,10 +367,10 @@ void show_users()
         }
         bool is_last_page = current == NULL;
         const int col = COLS / 4;
-        mvprintw(24, col - 3, "(d) Delete");
-        mvprintw(24, col + 15, "(p) Previous");
-        mvprintw(24, col + 35, "(n) Next");
-        mvprintw(24, col + 50, "(0) Logout");
+        mvprintw(LINES - 2, col - 3, "(d) Delete");
+        mvprintw(LINES - 2, col + 15, "(p) Previous");
+        mvprintw(LINES - 2, col + 35, "(n) Next");
+        mvprintw(LINES - 2, col + 50, "(0) Logout");
         char c = getch();
         switch (tolower(c))
         {
@@ -390,8 +390,6 @@ void show_users()
             clrtobot();
             logout();
             return;
-        case ' ':
-            break;
         case 'p':
             if (page == 0)
             {

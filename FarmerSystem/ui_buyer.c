@@ -1,5 +1,8 @@
-
+#include <string.h>
 #include <ctype.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
 
 #include "curses.h"
 #include "ui_buyer.h"
@@ -8,9 +11,15 @@
 #include "login.h"
 #include "sales.h"
 
-Product *products;
+#define filename "buyers.csv"
+#define BUF_SIZE 256
 
-void pickup_product(const User *seller, Product *product)
+Product *products;
+Buyer *buyers;
+User *user;
+int buyer_max_id = 0;
+
+void pickup_product(const User *seller, Product *product, char *buying)
 {
     int remaining = product_reduce_quantity(product, 1); //Minus the quantity of the product
     if (remaining < 0)
@@ -19,6 +28,21 @@ void pickup_product(const User *seller, Product *product)
     }
     else
     {
+        add_sale(product, get_logged_in_user(), 1, product->price);
+        show_message("Sold. It's all yours now.");
+    }
+}
+
+void delivered_product(const User *seller, Product *product, char *buying)
+{
+    int remaining = product_reduce_quantity(product, 1); //Minus the quantity of the product
+    if (remaining < 0)
+    {
+        show_message("You cannot buy more than there is.");
+    }
+    else
+    {
+        delivery_info(user);
         add_sale(product, get_logged_in_user(), 1, product->price);
         show_message("Sold. It's all yours now.");
     }
@@ -33,10 +57,10 @@ Product *buy_product_screen(Product *product)
         switch(menu(buyerm))
         {
         case 0:
-            pickup_product(get_logged_in_user(), product);
+            pickup_product(get_logged_in_user(), product, "Pick-up");
             return product;
         case 1:
-            //TODO
+            delivered_product(get_logged_in_user(), product, "Delivered");
             break;
         case 2:
             return NULL;
@@ -154,5 +178,51 @@ void show_buyer_screen()
             break;
         }
     }
+}
+
+Buyer *add_buyer(User *seller, const char *buyer_name, const int quantity, const char *location, int contact)
+{
+    /* First, we find the last user in the list. */
+    Buyer *last = buyers;
+    while (last != NULL && last->next != NULL)
+        last = last->next;
+    Buyer *delivery_info = malloc(sizeof(Product));
+    delivery_info->id = ++buyer_max_id; // Assign the next id, increment *before* assignment.
+    delivery_info->seller = seller;
+    strcpy(delivery_info->buyer_name, buyer_name); // Same for the product name
+    delivery_info->quantity = quantity; // This is a simple int, we can just assign it.
+    strcpy(delivery_info->location, location); // Again a string that we need to copy.
+    delivery_info->contact = contact;
+    delivery_info->next = NULL; // Make sure the list is properly terminated.
+    if (last != NULL) // Make sure there is a previous product at all.
+        last->next = delivery_info; // Append to the list.
+    else
+        buyers = delivery_info; // If there was no product before, now this one will be the beginning of our list.
+    return append_buyer(delivery_info);
+}
+
+/* Write a new product to the end of the file. This more robust than writing the complete file every time but of course doesn't work for updates of exisitng products. */
+Buyer *append_buyer(Buyer *delivery_info)
+{
+    if (delivery_info == NULL || delivery_info->seller == NULL)
+    {
+        fprintf(stderr, "Trying to add NULL product or product with NULL seller.\n");
+        return NULL;
+    }
+    FILE *f = fopen(filename, "a+"); // Here we simply append a line at the end of the file. Note that this doesn't work for changes/updates.
+    if (f == NULL)
+    {
+        fprintf(stderr, "%s:%d Could not open file.\n", __FUNCTION__, __LINE__); // Print a nice error message with function name and line number.
+        return NULL;
+    }
+    int written = fprintf(f, "%d,%d,%s,%d,%s,%d \n", delivery_info->id, delivery_info->seller->id, delivery_info->buyer_name, delivery_info->quantity, delivery_info->location, delivery_info->contact);
+    if (written < 0 || written >= BUF_SIZE)
+    {
+        fclose(f); // We don't want dangling open files in case of an error.
+        fprintf(stderr, "%s:%d Could not write file.\n", __FUNCTION__, __LINE__);
+        return NULL;
+    }
+    fclose(f); // We're done here.
+    return;
 }
 

@@ -56,7 +56,7 @@ int load_products()
 }
 
 /* Save all users in the file and return the number of users, or -1 if something went wrong.
- * This is actually a bit bad because when the writing fails, all data would be lost. Don't worry for now but in a real program this would have to be handled better. */
+ * TODO This is actually a bit bad because when the writing fails, all data would be lost. */
 int save_products()
 {
     FILE *f = fopen(filename, "w+");
@@ -67,6 +67,10 @@ int save_products()
     }
     Product *current = products; // We start with the head of the list.
     int count = 0; // Let's count the users.
+    /*if(f != NULL)
+    {
+        show_message("No products");
+    }*/
     while (current != NULL) // while we have more, we loop.
     {
         int written = fprintf(f, "%d,%d,%s,%s,%d,%d,%s\n", current->id, current->seller->id, current->product_type, current->product_name, current->quantity, current->price, current->location);
@@ -100,7 +104,7 @@ Product *add_product(User *seller, const char *product_type, const char *product
     new_product->next = NULL; // Make sure the list is properly terminated.
     if (last != NULL) // Make sure there is a previous product at all.
         last->next = new_product; // Append to the list.
-    else
+    if(products == NULL)
         products = new_product; // If there was no product before, now this one will be the beginning of our list.
     return append_product(new_product);
 }

@@ -4,9 +4,10 @@
 #include "ui.h"
 #include "user.h"
 #include "product.h"
+#include "ui_buyer.h"
 
-int menu_centered(const int num_items, const int max_width, const char **items);
-int menu_compact(const int num_items, const int max_width, const char **items);
+Product *product;
+User *user;
 
 /* Show a menu with a null-pointer terminated list of items and return the index of the user's selection.
  *
@@ -101,12 +102,12 @@ Product *new_product(User *user, char *product_type)
 void product_edit_screen()
 {
     clear();
-    Product *current = get_products();
+    char product_type[30];
     char product_name[21];
     int quantity;
     int price;
     char location[256];
-    // Product *product = NULL;
+    Product *product = NULL;
     int width = COLS / 2;
     int height = 12;
     WINDOW *win = newwin(height, width, (LINES - height) / 2, (COLS - width) / 2);
@@ -119,14 +120,13 @@ void product_edit_screen()
     wrefresh(win);
     echo(); // Turn on echo so the user sees what they are typing.
     curs_set(1); // Show the cursor so the user sees where they are typing.
-    mvwprintw(win, 2, 18, "%s", current->product_type);
+    mvwscanw(win, 2, 18, "%30[^\n]", product_type);
     mvwscanw(win, 3, 18, "%20[^\n]", product_name);
     mvwscanw(win, 4, 18, "%d", &quantity);
     mvwscanw(win, 5, 18, "%d", &price);
     mvwscanw(win, 6, 18, "%20[^\n]", location);
     curs_set(0); // Hide the cursor again.
     wrefresh(win);
-    save_products();
     int count = save_products();
     if (count < 0) // Something went wrong.
     {
@@ -141,7 +141,7 @@ void product_edit_screen()
 void show_message(char *msg)
 {
     const char s[] = " - Press any key.";
-    int l = LINES - 1;
+    int l = LINES - 6;
     int c = (COLS - strlen(msg) - strlen(s)) / 2;
     move(l, 0);
     clrtoeol();
@@ -149,8 +149,38 @@ void show_message(char *msg)
     getch();
     move(l, 0);
     clrtoeol();
+    refresh();
 }
 
+Buyer *delivery_info(User *user)
+{
+    clear();
+    headMessage("DELIVERY INFORMATION");
+    char buyer_name[50];
+    int quantity;
+    char location[256];
+    int contact;
+    int col = COLS / 3;
+    mvprintw(15, col, "Full name: ");
+    mvprintw(16, col, "Quantity: ");
+    mvprintw(17, col, "Complete Address: ");
+    mvprintw(18, col, "Contact No: ");
+    echo(); // Turn on echo so the user sees what they are typing.
+    curs_set(1); // Show the cursor so the user sees where they are typing.
+    mvscanw(15, col + 15, "%[^\n]", buyer_name);
+    mvscanw(16, col + 15, "%d", &quantity);
+    mvscanw(17, col + 18, "%[^\n]", location);
+    mvscanw(18, col + 18, "%d", &contact);
+    curs_set(0); // Hide the cursor again.
+    int count = add_buyer(user, buyer_name, quantity, location, contact);
+    if (count < 0) // Something went wrong.
+    {
+        mvprintw(LINES - 3, col, "Something went wrong. Press any key to continue.");
+        getch();
+    }
+    refresh();
+    return;
+}
 
 void printMessageCenter(const int l, const char *message)
 {
