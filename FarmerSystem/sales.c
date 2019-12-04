@@ -6,6 +6,7 @@
 #include "sales.h"
 
 #define filename "sales.csv"
+#define filename2 "sales-tmp.csv"
 #define BUF_SIZE 256
 
 Sale *sales;
@@ -66,7 +67,9 @@ int load_sales()
 
 int save_sales()
 {
-    FILE *f = fopen(filename, "w+");
+    if (remove(filename2))
+        fprintf(stderr, "%s:%d WARNING: I/O error %d\n", __FUNCTION__, __LINE__, errno);
+    FILE *f = fopen(filename2, "w+");
     if (f == NULL)
     {
         fprintf(stderr, "%s:%d Could not open file.\n", __FUNCTION__, __LINE__); // Print a nice error message with function name and line number.
@@ -87,6 +90,16 @@ int save_sales()
         current = current->next;
     }
     fclose(f); // We're done here.
+    if (remove(filename))
+    {
+        fprintf(stderr, "%s:%d I/O error %d\n", __FUNCTION__, __LINE__, errno);
+        return -1;
+    }
+    if (rename(filename2, filename))
+    {
+        fprintf(stderr, "%s:%d I/O error %d\n", __FUNCTION__, __LINE__, errno);
+        return -1;
+    }
     return count;
 }
 

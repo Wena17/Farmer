@@ -12,7 +12,7 @@ typedef struct Buyer
     char location[256];
     int contact;
     struct User *seller;
-    struct Product *next;
+    struct Buyer *next;
 } Buyer;
 
 Product *buy_product_screen(Product *product);

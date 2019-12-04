@@ -223,6 +223,6 @@ Buyer *append_buyer(Buyer *delivery_info)
         return NULL;
     }
     fclose(f); // We're done here.
-    return;
+    return delivery_info;
 }
 

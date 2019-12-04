@@ -26,6 +26,7 @@ int load_users()
         users->is_admin = 1; // The first user is the admin. Everybody else will be admin=0.
         users->is_seller = 0;
         users->next = NULL; // This is a pointer to the next user, creating a linked list of users. There is only one user here, so the "next" user is NULL.
+        save_users();
         return 1; // Pretend we read one user.
     }
     char buf[BUF_SIZE]; // We'll use this variable to load lines of our file into. C is not very convenient when it comes to strings, you have to do a lot of stuff by hand.
@@ -45,6 +46,7 @@ int load_users()
             fprintf(stderr, "Skipping invalid line.\n"); // Be nice and print a notice.
             continue; // Loop around.
         }
+        fprintf(stderr, "Read user %d: %s\n", u->id, u->user_name);
         /* At this point, we've read the fields of one line into the User in variable u. */
         if (previous == NULL) // This means we just read the first user.
             users = u; // So remember the start of the list in our global variable. Otherwise we'll never find it again.
@@ -79,6 +81,7 @@ int save_users() {
             fprintf(stderr, "%s:%d Could not write file.\n", __FUNCTION__, __LINE__);
             return -1;
         }
+        fprintf(stderr, "Wrote user %d: %s\n", u->id, u->user_name);
         count++;
         u = u->next;
     }

@@ -6,6 +6,7 @@
 #include "product.h"
 
 #define filename "products.csv"
+#define filename2 "products-tmp.csv"
 #define BUF_SIZE 256
 
 Product *append_product(Product *new_product);
@@ -59,7 +60,9 @@ int load_products()
  * TODO This is actually a bit bad because when the writing fails, all data would be lost. */
 int save_products()
 {
-    FILE *f = fopen(filename, "w+");
+    if (remove(filename2))
+    fprintf(stderr, "%s:%d WARNING: I/O error %d\n", __FUNCTION__, __LINE__, errno);
+    FILE *f = fopen(filename2, "w+");
     if (f == NULL)
     {
         fprintf(stderr, "%s:%d Could not open file.\n", __FUNCTION__, __LINE__); // Print a nice error message with function name and line number.
@@ -84,6 +87,17 @@ int save_products()
         current = current->next;
     }
     fclose(f); // We're done here.
+    if (remove(filename))
+    {
+        fprintf(stderr, "%s:%d I/O error %d\n", __FUNCTION__, __LINE__, errno);
+        return -1;
+    }
+    if (rename(filename2, filename))
+    {
+        fprintf(stderr, "%s:%d I/O error %d\n", __FUNCTION__, __LINE__, errno);
+        return -1;
+    }
+
     return count;
 }
 
@@ -123,7 +137,14 @@ Product *append_product(Product *new_product)
         fprintf(stderr, "%s:%d Could not open file.\n", __FUNCTION__, __LINE__); // Print a nice error message with function name and line number.
         return NULL;
     }
-    int written = fprintf(f, "%d,%d,%s,%s,%d,%d,%s,%d \n", new_product->id, new_product->seller->id, new_product->product_type, new_product->product_name, new_product->quantity, new_product->price, new_product->location);
+    int written = fprintf(f, "%d,%d,%s,%s,%d,%d,%s\n",
+                          new_product->id,
+                          new_product->seller->id,
+                          new_product->product_type,
+                          new_product->product_name,
+                          new_product->quantity,
+                          new_product->price,
+                          new_product->location);
     if (written < 0 || written >= BUF_SIZE)
     {
         fclose(f); // We don't want dangling open files in case of an error.

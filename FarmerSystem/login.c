@@ -81,7 +81,7 @@ bool login_or_signup(const bool is_seller)
         if(i >= 3)
         {
             show_message("You've reach the times to login.");
-            return;
+            return false;
         }
     }
     while (user == NULL);

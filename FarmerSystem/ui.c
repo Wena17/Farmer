@@ -107,7 +107,6 @@ void product_edit_screen()
     int quantity;
     int price;
     char location[256];
-    Product *product = NULL;
     int width = COLS / 2;
     int height = 12;
     WINDOW *win = newwin(height, width, (LINES - height) / 2, (COLS - width) / 2);
@@ -172,14 +171,14 @@ Buyer *delivery_info(User *user)
     mvscanw(17, col + 18, "%[^\n]", location);
     mvscanw(18, col + 18, "%d", &contact);
     curs_set(0); // Hide the cursor again.
-    int count = add_buyer(user, buyer_name, quantity, location, contact);
-    if (count < 0) // Something went wrong.
+    Buyer *b = add_buyer(user, buyer_name, quantity, location, contact);
+    if (b == NULL) // Something went wrong.
     {
         mvprintw(LINES - 3, col, "Something went wrong. Press any key to continue.");
         getch();
     }
     refresh();
-    return;
+    return b;
 }
 
 void printMessageCenter(const int l, const char *message)
