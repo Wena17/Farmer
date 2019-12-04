@@ -57,7 +57,7 @@ int load_products()
 }
 
 /* Save all users in the file and return the number of users, or -1 if something went wrong.
- * TODO This is actually a bit bad because when the writing fails, all data would be lost. */
+ * We're writing into a temporary file which we rename to the real filename after successful writing, to avoid data loss in case of errors.  */
 int save_products()
 {
     if (remove(filename2))
