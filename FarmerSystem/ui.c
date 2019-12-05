@@ -99,39 +99,6 @@ Product *new_product(User *user, char *product_type)
     return newproduct;
 }
 
-void product_edit_screen(Product *p)
-{
-    clear();
-    int width = COLS / 2;
-    int height = 12;
-    WINDOW *win = newwin(height, width, (LINES - height) / 2, (COLS - width) / 2);
-    wclear(win);
-    mvwprintw(win, 2, 4, "Product type: %s", p->product_type);
-    mvwprintw(win, 3, 4, "Product name: %s", p->product_name);
-    mvwprintw(win, 4, 4, "Quantity:     %d", p->quantity);
-    mvwprintw(win, 5, 4, "Price:        %d", p->price);
-    mvwprintw(win, 6, 4, "Location:     %s", p->location);
-    wrefresh(win);
-    echo(); // Turn on echo so the user sees what they are typing.
-    curs_set(1); // Show the cursor so the user sees where they are typing.
-    mvwscanw(win, 2, 18, "%255[^\n]", p->product_type);
-    mvwscanw(win, 3, 18, "%255[^\n]", p->product_name);
-    mvwscanw(win, 4, 18, "%d", &p->quantity);
-    mvwscanw(win, 5, 18, "%d", &p->price);
-    mvwscanw(win, 6, 18, "%255[^\n]", p->location);
-    curs_set(0); // Hide the cursor again.
-    wrefresh(win);
-    int count = save_products();
-    if (count < 0) // Something went wrong.
-    {
-        mvwprintw(win, 6, 2, "Something went wrong. Press any key to continue.");
-        wrefresh(win);
-        getch();
-    }
-    wrefresh(win);
-    return;
-}
-
 void show_message(char *msg)
 {
     const char s[] = " - Press any key.";
