@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <errno.h>
 
 #include "product.h"
 
@@ -82,7 +83,7 @@ int save_products()
         current = current->next;
     }
     fclose(f); // We're done here.
-    if (remove(filename))
+    if (remove(filename) && errno != ENOENT)
     {
         fprintf(stderr, "%s:%d I/O error %d\n", __FUNCTION__, __LINE__, errno);
         return -1;

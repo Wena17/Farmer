@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
 #include "sales.h"
 
@@ -30,7 +31,8 @@ int load_sales()
         int buyer_id;
         int quantity;
         int price;
-        int rc = sscanf(buf, " %d,%d,%d,%d", &product_id, &buyer_id, &quantity, &price);
+        int mode;
+        int rc = sscanf(buf, " %d,%d,%d,%d,%d", &product_id, &buyer_id, &quantity, &price, &mode);
         if (rc != 4) // The number of fields read is in rc. This should be 5 unless it's somehow an invalid line. If it's invalid, simply skip it.
         {
             fprintf(stderr, "%s:%d WARNING! Skipping invalid line '%s'.\n", __FUNCTION__, __LINE__, buf); // Be nice and print a notice.
@@ -53,6 +55,7 @@ int load_sales()
         current->product = p;
         current->price = price;
         current->quantity = quantity;
+        current->mode = mode;
         current->next = NULL; // Initialize link in case this is the last one.
         if (previous == NULL) // This means we just read the first user.
             sales = current; // So remember the start of the list in our global variable. Otherwise we'll never find it again.
@@ -67,8 +70,7 @@ int load_sales()
 
 int save_sales()
 {
-    if (remove(filename2))
-        fprintf(stderr, "%s:%d WARNING: I/O error %d\n", __FUNCTION__, __LINE__, errno);
+    remove(filename2);
     FILE *f = fopen(filename2, "w+");
     if (f == NULL)
     {
@@ -79,7 +81,7 @@ int save_sales()
     int count = 0; // Let's count the users.
     while (current != NULL) // while we have more, we loop.
     {
-        int written = fprintf(f, "%d,%d,%d,%d\n", current->product->id, current->buyer->id, current->quantity, current->price);
+        int written = fprintf(f, "%d,%d,%d,%d,%d\n", current->product->id, current->buyer->id, current->quantity, current->price, current->mode);
         if (written < 0 || written >= BUF_SIZE)
         {
             fclose(f); // We don't want dangling open files in case of an error.
@@ -90,7 +92,7 @@ int save_sales()
         current = current->next;
     }
     fclose(f); // We're done here.
-    if (remove(filename))
+    if (remove(filename) && errno != ENOENT)
     {
         fprintf(stderr, "%s:%d I/O error %d\n", __FUNCTION__, __LINE__, errno);
         return -1;
@@ -108,7 +110,7 @@ Sale *get_sales()
     return sales;
 }
 
-int add_sale(Product *product, User *buyer, int quantity, int price)
+int add_sale(Product *product, User *buyer, int quantity, int price, int mode)
 {
     Sale *tail = sales;
     while (tail)
@@ -127,6 +129,7 @@ int add_sale(Product *product, User *buyer, int quantity, int price)
     s->buyer = buyer;
     s->quantity = quantity;
     s->price = price;
+    s->mode = mode;
     s->next = NULL;
     if (tail) // If the list isn't empty ...
     {

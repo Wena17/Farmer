@@ -36,6 +36,8 @@ void show_sales_for_seller()
                     clrtoeol();
                     mvprintw(line, 75, "%d", current->price);
                     clrtoeol();
+                    mvprintw(line, 80, "%d", current->mode);
+                    clrtoeol();
                     line++;
                 }
                 i++;

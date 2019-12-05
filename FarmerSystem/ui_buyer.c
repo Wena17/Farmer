@@ -19,7 +19,7 @@ Buyer *buyers;
 User *user;
 int buyer_max_id = 0;
 
-void pickup_product(const User *seller, Product *product, char *buying)
+void pickup_product(const User *seller, Product *product, int mode)
 {
     int remaining = product_reduce_quantity(product, 1); //Minus the quantity of the product
     if (remaining < 0)
@@ -28,12 +28,12 @@ void pickup_product(const User *seller, Product *product, char *buying)
     }
     else
     {
-        add_sale(product, get_logged_in_user(), 1, product->price);
+        add_sale(product, get_logged_in_user(), 1, product->price, mode);
         show_message("Sold. It's all yours now.");
     }
 }
 
-void delivered_product(const User *seller, Product *product, char *buying)
+void delivered_product(const User *seller, Product *product, int mode)
 {
     int remaining = product_reduce_quantity(product, 1); //Minus the quantity of the product
     if (remaining < 0)
@@ -43,7 +43,7 @@ void delivered_product(const User *seller, Product *product, char *buying)
     else
     {
         delivery_info(user);
-        add_sale(product, get_logged_in_user(), 1, product->price);
+        add_sale(product, get_logged_in_user(), 1, product->price, mode);
         show_message("Sold. It's all yours now.");
     }
 }
@@ -57,10 +57,10 @@ Product *buy_product_screen(Product *product)
         switch(menu(buyerm))
         {
         case 0:
-            pickup_product(get_logged_in_user(), product, "Pick-up");
+            pickup_product(get_logged_in_user(), product, SALE_PICKUP);
             return product;
         case 1:
-            delivered_product(get_logged_in_user(), product, "Delivered");
+            delivered_product(get_logged_in_user(), product, SALE_DELIVERY);
             break;
         case 2:
             return NULL;

@@ -19,6 +19,6 @@ Product *buy_product_screen(Product *product);
 Buyer *add_buyer(User *seller, const char *buyer_name, const int quantity, const char *location, int contact);
 Buyer *append_buyer(Buyer *delivery_info);
 void show_buyer_screen();
-void delivered_product(const User *seller, Product *product, char *buying);
+void delivered_product(const User *seller, Product *product, int mode);
 
 #endif // UI_BUYER_H_INCLUDED
