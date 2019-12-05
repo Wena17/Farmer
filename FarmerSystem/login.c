@@ -80,8 +80,8 @@ bool login_or_signup(const bool is_seller)
         }
         if(i >= 3)
         {
-            show_message("You've reach the times to login.");
-            return false;
+            show_message("You've reached the times to login.");
+            break;
         }
     }
     while (user == NULL);

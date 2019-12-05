@@ -78,7 +78,7 @@ void homePage()
             {
                 show_users();
             }
-            else
+            else if(get_logged_in_user())
             {
                 logout();
                 show_message("No admin rights");
