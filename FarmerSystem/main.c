@@ -164,7 +164,8 @@ void show_products()
     headMessage("PRODUCTS YOU ARE SELLING");
     int col = COLS / 4;
     int page = 0;
-    int selection = -1; // -1 means: Nothing is selected
+    Product *displayed_products[9];
+    Product *selected_product = NULL; // -1 means: Nothing is selected
     mvprintw(10, col, "Product type");
     mvprintw(10, col + 18, "Products");
     mvprintw(10, col + 36, "Quantity");
@@ -179,10 +180,12 @@ void show_products()
         clrtobot();
         while (current != NULL)
         {
+            for (int i = 0; i < 9; i++) displayed_products[i] = NULL;
             if (current->seller == get_logged_in_user())
             {
                 if (i >= 9 * page && i < 9 * (page + 1))
                 {
+                    displayed_products[i % 9] = current;
                     mvprintw(line, col - 10, "%d   =>", i + 1);
                     mvprintw(line, col, "%s", current->product_type);
                     clrtoeol();
@@ -194,7 +197,7 @@ void show_products()
                     clrtoeol();
                     mvprintw(line, col + 58, "%s", current->location);
                     clrtoeol();
-                    if (i == selection)
+                    if (current == selected_product)
                     {
                         mvprintw(line, col - 15, "(Selected)");
                     }
@@ -217,16 +220,15 @@ void show_products()
         case '7':
         case '8':
         case '9':
-            selection = page * 9 + c - '1';
+            selected_product = displayed_products[c - '1'];
             break;
         case '0':
             return;
         case 'e':
-            if (selection != -1)
+            if (selected_product != NULL)
             {
                 headMessage("UPDATING PRODUCTS");
-                product_edit_screen();
-                selection = -1;
+                product_edit_screen(selected_product);
             }
             else
             {
@@ -241,6 +243,7 @@ void show_products()
                 break;
             }
             page--;
+            selected_product = NULL;
             break;
         case 'n':
             if(is_last_page)
@@ -250,14 +253,14 @@ void show_products()
             else
             {
                 page++;
-                selection = -1;
+                selected_product = NULL;
             }
             break;
         case 'd':
-            if (selection != -1)
+            if (selected_product != NULL)
             {
-                delete_product_from_index(get_logged_in_user(), selection);
-                selection = -1;
+                delete_product(selected_product);
+                selected_product = NULL;
             }
             else
             {

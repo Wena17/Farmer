@@ -20,7 +20,7 @@ int load_products()
     FILE *f = fopen(filename, "r");
     if (f == NULL) // Could not open the file.
     {
-        fprintf(stderr, "WARNING! Could not load product file.\n");
+        fprintf(stderr, "%s:%d WARNING! Could not load product file.\n", __FUNCTION__, __LINE__);
         return 0; // If we can't read any products we just forget about them.
     }
     char buf[BUF_SIZE]; // We'll use this variable to load lines of our file into. C is not very convenient when it comes to strings, you have to do a lot of stuff by hand.
@@ -60,8 +60,7 @@ int load_products()
  * We're writing into a temporary file which we rename to the real filename after successful writing, to avoid data loss in case of errors.  */
 int save_products()
 {
-    if (remove(filename2))
-    fprintf(stderr, "%s:%d WARNING: I/O error %d\n", __FUNCTION__, __LINE__, errno);
+    remove(filename2);
     FILE *f = fopen(filename2, "w+");
     if (f == NULL)
     {
@@ -70,10 +69,6 @@ int save_products()
     }
     Product *current = products; // We start with the head of the list.
     int count = 0; // Let's count the users.
-    /*if(f != NULL)
-    {
-        show_message("No products");
-    }*/
     while (current != NULL) // while we have more, we loop.
     {
         int written = fprintf(f, "%d,%d,%s,%s,%d,%d,%s\n", current->id, current->seller->id, current->product_type, current->product_name, current->quantity, current->price, current->location);
@@ -193,37 +188,6 @@ void delete_product(Product *p)
             free(current); // Free memory of the deleted product.
             save_products();
             return;
-        }
-        previous = current;
-        current = current->next; // Got to the next product in the list.
-    }
-    // At this point, we haven't found a product with the right seller and the given index. We just return.
-}
-
-void delete_product_from_index(const User *seller, const int index)
-{
-    Product *current = products;
-    Product *previous = NULL;
-    int i = 0;
-    while (current != NULL)
-    {
-        if (current->seller == seller) // If this product has the correct seller ...
-        {
-            if (index == i) // And the right index, we've found the item we are looking for.
-            {
-                if (previous != NULL) // If there is a previous product...
-                {
-                    previous->next = current->next; // .. then make this one's seccessor the next of the previous.
-                }
-                else // Otherwise this one is the first product ...
-                {
-                    products = current->next; // ... so move the head of the list to the next one.
-                }
-                free(current); // Free memory of the deleted product.
-                save_products();
-                return;
-            }
-            i++; // This product has the right seller but it has the wrong index, so count up.
         }
         previous = current;
         current = current->next; // Got to the next product in the list.

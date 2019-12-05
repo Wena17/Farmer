@@ -16,7 +16,7 @@ int load_sales()
     FILE *f = fopen(filename, "r");
     if (f == NULL) // Could not open the file.
     {
-        fprintf(stderr, "%s:%d WARNING! Could not load product file.\n", __FUNCTION__, __LINE__);
+        fprintf(stderr, "%s:%d WARNING! Could not load sales file.\n", __FUNCTION__, __LINE__);
         return 0; // If we can't read any products we just forget about them.
     }
     char buf[BUF_SIZE]; // We'll use this variable to load lines of our file into. C is not very convenient when it comes to strings, you have to do a lot of stuff by hand.
