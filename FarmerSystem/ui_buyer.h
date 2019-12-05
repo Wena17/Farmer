@@ -15,7 +15,7 @@ typedef struct Buyer
     struct Buyer *next;
 } Buyer;
 
-Product *buy_product_screen(Product *product);
+void buy_product_screen(Product *product);
 Buyer *add_buyer(User *seller, const char *buyer_name, const int quantity, const char *location, int contact);
 Buyer *append_buyer(Buyer *delivery_info);
 void show_buyer_screen();

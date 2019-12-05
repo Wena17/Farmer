@@ -84,7 +84,7 @@ void delivered_product(const User *seller, Product *product, int mode)
     }
 }
 
-Product *buy_product_screen(Product *product)
+void buy_product_screen(Product *product)
 {
     const char *buyerm[] = {"Pick-up", "Delivered", "Back", NULL};
 
@@ -94,12 +94,12 @@ Product *buy_product_screen(Product *product)
         {
         case 0:
             pickup_product(get_logged_in_user(), product, SALE_PICKUP);
-            return product;
+            return;
         case 1:
             delivered_product(get_logged_in_user(), product, SALE_DELIVERY);
-            break;
+            return;
         case 2:
-            return NULL;
+            return;
         default:
             show_message("Invalid selection");
             break;
