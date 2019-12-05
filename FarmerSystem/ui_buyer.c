@@ -20,7 +20,7 @@ User *user;
 int buyer_max_id = 0;
 
 
-int delivery_info()
+int delivery_info(int mode)
 {
     clear();
     headMessage("DELIVERY INFORMATION");
@@ -31,16 +31,19 @@ int delivery_info()
     int col = COLS / 3;
     mvprintw(15, col, "Full name: ");
     mvprintw(16, col, "Quantity: ");
-    mvprintw(17, col, "Complete Address: ");
+    mvprintw(17, col, mode == SALE_DELIVERY ? "Complete Address: " : "For pickup");
     mvprintw(18, col, "Contact No: ");
     echo(); // Turn on echo so the user sees what they are typing.
     curs_set(1); // Show the cursor so the user sees where they are typing.
     mvscanw(15, col + 15, "%[^\n]", buyer_name);
     mvscanw(16, col + 15, "%d", &quantity);
-    mvscanw(17, col + 18, "%[^\n]", location);
+    if (mode == SALE_DELIVERY)
+    {
+        mvscanw(17, col + 18, "%[^\n]", location);
+    }
     mvscanw(18, col + 18, "%d", &contact);
     curs_set(0); // Hide the cursor again.
-    Buyer *b = add_buyer(user, buyer_name, quantity, location, contact);
+    Buyer *b = add_buyer(user, buyer_name, quantity, mode == SALE_DELIVERY ? location : "Pickup", contact);
     if (b == NULL) // Something went wrong.
     {
         mvprintw(LINES - 3, col, "Something went wrong. Press any key to continue.");
@@ -53,21 +56,7 @@ int delivery_info()
 
 void pickup_product(const User *seller, Product *product, int mode)
 {
-    int remaining = product_reduce_quantity(product, 1); //Minus the quantity of the product
-    if (remaining < 0)
-    {
-        show_message("You cannot buy more than there is.");
-    }
-    else
-    {
-        add_sale(product, get_logged_in_user(), 1, product->price, mode);
-        show_message("Sold. It's all yours now.");
-    }
-}
-
-void delivered_product(const User *seller, Product *product, int mode)
-{
-    int desired = delivery_info();
+    int desired = delivery_info(SALE_PICKUP);
     int remaining = product_reduce_quantity(product, desired); //Minus the quantity of the product
     if (remaining < 0)
     {
@@ -75,7 +64,22 @@ void delivered_product(const User *seller, Product *product, int mode)
     }
     else
     {
-        add_sale(product, get_logged_in_user(), 1, product->price, mode);
+        add_sale(product, get_logged_in_user(), desired, product->price, mode);
+        show_message("Sold. It's all yours now.");
+    }
+}
+
+void delivered_product(const User *seller, Product *product, int mode)
+{
+    int desired = delivery_info(SALE_DELIVERY);
+    int remaining = product_reduce_quantity(product, desired); //Minus the quantity of the product
+    if (remaining < 0)
+    {
+        show_message("You cannot buy more than there is.");
+    }
+    else
+    {
+        add_sale(product, get_logged_in_user(), desired, product->price, mode);
         show_message("Sold. It's all yours now.");
     }
 }

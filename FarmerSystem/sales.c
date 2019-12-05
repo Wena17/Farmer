@@ -33,7 +33,7 @@ int load_sales()
         int price;
         int mode;
         int rc = sscanf(buf, " %d,%d,%d,%d,%d", &product_id, &buyer_id, &quantity, &price, &mode);
-        if (rc != 4) // The number of fields read is in rc. This should be 5 unless it's somehow an invalid line. If it's invalid, simply skip it.
+        if (rc != 5) // The number of fields read is in rc. This should be 5 unless it's somehow an invalid line. If it's invalid, simply skip it.
         {
             fprintf(stderr, "%s:%d WARNING! Skipping invalid line '%s'.\n", __FUNCTION__, __LINE__, buf); // Be nice and print a notice.
             continue; // Loop around.
