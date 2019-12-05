@@ -113,36 +113,6 @@ void show_message(char *msg)
     refresh();
 }
 
-Buyer *delivery_info(User *user)
-{
-    clear();
-    headMessage("DELIVERY INFORMATION");
-    char buyer_name[50];
-    int quantity;
-    char location[256];
-    int contact;
-    int col = COLS / 3;
-    mvprintw(15, col, "Full name: ");
-    mvprintw(16, col, "Quantity: ");
-    mvprintw(17, col, "Complete Address: ");
-    mvprintw(18, col, "Contact No: ");
-    echo(); // Turn on echo so the user sees what they are typing.
-    curs_set(1); // Show the cursor so the user sees where they are typing.
-    mvscanw(15, col + 15, "%[^\n]", buyer_name);
-    mvscanw(16, col + 15, "%d", &quantity);
-    mvscanw(17, col + 18, "%[^\n]", location);
-    mvscanw(18, col + 18, "%d", &contact);
-    curs_set(0); // Hide the cursor again.
-    Buyer *b = add_buyer(user, buyer_name, quantity, location, contact);
-    if (b == NULL) // Something went wrong.
-    {
-        mvprintw(LINES - 3, col, "Something went wrong. Press any key to continue.");
-        getch();
-    }
-    refresh();
-    return b;
-}
-
 void printMessageCenter(const int l, const char *message)
 {
     const int col = (COLS - strlen(message)) / 2; // COLS is the number of columns of the screen. Calculate column to center message.
