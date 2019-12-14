@@ -35,11 +35,11 @@ void show_sales_for_seller()
                     clrtoeol();
                     mvprintw(line, 36, "%s", current->buyer->user_name);
                     clrtoeol();
-                    mvprintw(line, 57, "%d", current->quantity);
+                    mvprintw(line, 56, "%6d", current->quantity);
                     clrtoeol();
-                    mvprintw(line, 72, "%d", current->price);
+                    mvprintw(line, 70, "%5d", current->price);
                     clrtoeol();
-                    mvprintw(line, 85, "%d", current->quantity * current->price);
+                    mvprintw(line, 82, "%8d", current->quantity * current->price);
                     clrtoeol();
                     mvprintw(line, 100, "%d", current->mode);
                     clrtoeol();

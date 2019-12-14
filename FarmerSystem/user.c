@@ -46,7 +46,7 @@ int load_users()
             fprintf(stderr, "Skipping invalid line.\n"); // Be nice and print a notice.
             continue; // Loop around.
         }
-        fprintf(stderr, "Read user %d: %s\n", u->id, u->user_name);
+        // fprintf(stderr, "Read user %d: %s\n", u->id, u->user_name);
         /* At this point, we've read the fields of one line into the User in variable u. */
         if (previous == NULL) // This means we just read the first user.
             users = u; // So remember the start of the list in our global variable. Otherwise we'll never find it again.
