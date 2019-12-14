@@ -7,9 +7,126 @@
 #include "user.h"
 #include "product.h"
 #include "ui_buyer.h"
+#include "login.h"
+#include "sales.h"
 
 Product *product;
 User *user;
+
+void show_purchases()
+{
+    const User *current_user = get_logged_in_user();
+    const bool is_seller = current_user->is_seller;
+    clear();
+    headMessage(is_seller ? "ALL YOUR SALES" : "ALL YOUR PURCHASES");
+    int page = 0;
+    mvprintw(10, 15, "Product");
+    mvprintw(10, 35, is_seller ? "Buyer Name" : "Seller Name");
+    mvprintw(10, 55, "Quantity");
+    mvprintw(10, 70, "Price");
+    mvprintw(10, 80, "Total Price");
+    mvprintw(10, 98, "<1>Pick-up");
+    mvprintw(11, 98, "<2>Delivery");
+    while(true)
+    {
+        Sale *current = get_sales();
+        int line = 13;
+        int i = 0;
+        move(line, 0);
+        clrtobot();
+        while (current != NULL)
+        {
+            const User *role = is_seller ? current->product->seller : current->buyer;
+            if (role == current_user)
+            {
+                if (i >= 9 * page && i < 9 * (page + 1))
+                {
+                    mvprintw(line, 16, "%s", current->product->product_name);
+                    clrtoeol();
+                    mvprintw(line, 36, "%s", is_seller ? current->buyer->user_name : current->product->seller->user_name);
+                    clrtoeol();
+                    mvprintw(line, 56, "%6d", current->quantity);
+                    clrtoeol();
+                    mvprintw(line, 70, "%5d", current->price);
+                    clrtoeol();
+                    mvprintw(line, 82, "%8d", current->quantity * current->price);
+                    clrtoeol();
+                    mvprintw(line, 100, "%d", current->mode);
+                    clrtoeol();
+                    line++;
+                }
+                i++;
+            }
+            current = current->next;
+        }
+        bool is_last_page = current == NULL;
+        mvprintw(LINES - 2, 30, "(p) Previous");
+        mvprintw(LINES - 2, 50, "(n) Next");
+        mvprintw(LINES - 2, 70, "(0) Back");
+        refresh();
+        char c = getch();
+        switch (tolower(c))
+        {
+        case '0':
+            move(10,0);
+            clrtobot();
+            refresh();
+            return;
+        case 'p':
+            if (page == 0)
+                show_message("You're already on the first page.");
+            else
+                page--;
+            break;
+        case 'n':
+            if(is_last_page)
+            {
+                show_message("No Records Found");
+            }
+            else
+                page++;
+            break;
+        default:
+            show_message("Invalid selection");
+            break;
+        }
+    }
+}
+
+char show_menu(char *menu_chars, char **menu_items)
+{
+    int total_length = 0;
+    char **current_item = menu_items;
+    while (*current_item)
+    {
+        total_length += strlen(*current_item) + 4;
+        current_item++;
+        if (current_item) total_length += 2;
+    }
+    int col = (COLS - total_length) / 2;
+    col = col < 0 ? 0 : col;
+    char *current_char = menu_chars;
+    current_item = menu_items;
+    while (*current_item)
+    {
+        mvprintw(LINES - 2, col, "(%c) %s", *current_char, *current_item);
+        col += strlen(*current_item) + 6;
+        current_char++;
+        current_item++;
+    }
+    refresh();
+    while (true)
+    {
+        char c = tolower(getch());
+        const char *s = menu_chars;
+        while (*s)
+        {
+            if (*s == c) return c;
+            s++;
+        }
+    }
+
+}
 
 /* Show a menu with common options for a paged list and wait for the user to select one. */
 char show_edit_menu(bool has_edit)
@@ -137,24 +254,21 @@ void show_message(char *msg)
     refresh();
 }
 
-void printMessageCenter(const int l, const char *message)
-{
-    const int col = (COLS - strlen(message)) / 2; // COLS is the number of columns of the screen. Calculate column to center message.
-    mvprintw(l, col, "%s", message); // mvprintw is like printf() but with the row and column position where to start.
-}
-
 void headMessage(const char *message)
 {
-    clear(); // Clear the screen.
-    const char l[] = "°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°";
-    const int col = (COLS - strlen(l)) / 2; // Calculate the column to center the string.
-    mvprintw(0, col, "°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°");
-    mvprintw(1, col, "°                                                                         °");
-    mvprintw(2, col, "°                     Farmer's Cooperative Sales Platform                 °");
-    mvprintw(3, col, "°                                                                         °");
-    mvprintw(4, col, "°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°");
-    mvprintw(6, col, "*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*");
-    printMessageCenter(7, message);
-    mvprintw(8, col, "*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*");
     refresh();
+    const int len = strlen("°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°");
+    const int col = (COLS - len) / 2; // Calculate the column to center the string.
+    WINDOW *win = newwin(9, len, 0, col);
+    wclear(win);
+    mvwprintw(win, 0, 0, "°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°");
+    mvwprintw(win, 1, 0, "°                                                                         °");
+    mvwprintw(win, 2, 0, "°                     Farmer's Cooperative Sales Platform                 °");
+    mvwprintw(win, 3, 0, "°                                                                         °");
+    mvwprintw(win, 4, 0, "°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°");
+    mvwprintw(win, 6, 0, "*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*");
+    mvwprintw(win, 7, (len - strlen(message)) / 2, "%s", message);
+    mvwprintw(win, 8, 0, "*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*");
+    wrefresh(win);
+    delwin(win);
 }

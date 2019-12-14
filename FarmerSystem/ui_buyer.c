@@ -19,7 +19,6 @@ Buyer *buyers;
 User *user;
 int buyer_max_id = 0;
 
-
 int delivery_info(int mode)
 {
     clear();
@@ -111,19 +110,19 @@ void buy_product_screen(Product *product)
 void show_buyer_screen()
 {
     clear();
-    headMessage("AVAILABLE PRODUCTS");
     int col = COLS / 4;
     int page = 0;
     Product *selected_product = NULL; // -1 means: Nothing is selected
     Product *displayed_products[9];
-    mvprintw(10, col - 10, "Seller");
-    mvprintw(10, col, "Product type");
-    mvprintw(10, col + 18, "Products");
-    mvprintw(10, col + 36, "Quantity");
-    mvprintw(10, col + 48, "Price");
-    mvprintw(10, col + 58, "Location");
     while(true)
     {
+        headMessage("AVAILABLE PRODUCTS");
+        mvprintw(10, col - 10, "Seller");
+        mvprintw(10, col, "Product type");
+        mvprintw(10, col + 18, "Products");
+        mvprintw(10, col + 36, "Quantity");
+        mvprintw(10, col + 48, "Price");
+        mvprintw(10, col + 58, "Location");
         for (int i = 0; i < 9; i++)
             displayed_products[i] = NULL;
         Product *current = get_products();
@@ -162,14 +161,10 @@ void show_buyer_screen()
             current = current->next;
         }
         bool is_last_page = current == NULL;
-
-        mvprintw(LINES - 2, col - 3, "(b) Buy");
-        mvprintw(LINES - 2, col + 15, "(p) Previous");
-        mvprintw(LINES - 2, col + 35, "(n) Next");
-        mvprintw(LINES - 2, col + 50, "(0) Logout");
-        refresh();
-        char c = getch();
-        switch (tolower(c))
+        char *menu_chars = "bpnu0123456789";
+        char *menu_items[] = { "Buy", "Previous", "Next", "pUrchases", "Logout", NULL };
+        char c = show_menu(menu_chars, menu_items);
+        switch (c)
         {
         case '1':
         case '2':
@@ -208,6 +203,9 @@ void show_buyer_screen()
                 buy_product_screen(selected_product);
                 selected_product = NULL;
             }
+            break;
+        case 'u':
+            show_purchases();
             break;
         default:
             show_message("Invalid selection");

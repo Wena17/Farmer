@@ -44,6 +44,7 @@ void welcomeMessage()
 {
     headMessage("Welcome");
     /* This can be optimized to use screen coordinates. */
+    move(9, 0);
     printw("\n\n\n\t\t\t\t\t\t같같같같같같같같같같같같같같같");
     printw("\n\t\t\t\t\t      같                              같");
     printw("\n\t\t\t\t\t   같                                    같");
@@ -60,6 +61,8 @@ void welcomeMessage()
     printw("\n\n\n\n\t\t\t\t\t     Press any key to continue.....");
     refresh();
     getch();
+    clear();
+    refresh();
 }
 
 void homePage()
