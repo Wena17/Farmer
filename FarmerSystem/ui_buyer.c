@@ -11,66 +11,70 @@
 #include "login.h"
 #include "sales.h"
 
-#define filename "buyers.csv"
-#define BUF_SIZE 256
-
 Product *products;
-Buyer *buyers;
 User *user;
 int buyer_max_id = 0;
 
-int delivery_info(int mode)
+int delivery_info(int mode, const Product *product)
 {
+    User *buyer = get_logged_in_user();
     clear();
     headMessage("DELIVERY INFORMATION");
-    char buyer_name[50];
     int quantity;
-    char location[256];
-    int contact;
     int col = COLS / 3;
-    mvprintw(15, col, "Full name: ");
-    mvprintw(16, col, "Quantity: ");
-    mvprintw(17, col, mode == SALE_DELIVERY ? "Complete Address: " : "For pickup");
-    mvprintw(18, col, "Contact No: ");
-    echo(); // Turn on echo so the user sees what they are typing.
-    curs_set(1); // Show the cursor so the user sees where they are typing.
-    mvscanw(15, col + 15, "%[^\n]", buyer_name);
-    mvscanw(16, col + 15, "%d", &quantity);
+    mvprintw(15, col, "Full name:    %s", buyer->full_name);
+    mvprintw(16, col, "Quantity:");
     if (mode == SALE_DELIVERY)
     {
-        mvscanw(17, col + 18, "%[^\n]", location);
-    }
-    mvscanw(18, col + 18, "%d", &contact);
-    curs_set(0); // Hide the cursor again.
-    Buyer *b = add_buyer(user, buyer_name, quantity, mode == SALE_DELIVERY ? location : "Pickup", contact);
-    if (b == NULL) // Something went wrong.
-    {
-        mvprintw(LINES - 3, col, "Something went wrong. Press any key to continue.");
-        getch();
-        return 0;
-    }
-    refresh();
-    return quantity;
-}
-
-void pickup_product(const User *seller, Product *product, int mode)
-{
-    int desired = delivery_info(SALE_PICKUP);
-    int remaining = product_reduce_quantity(product, desired); //Minus the quantity of the product
-    if (remaining < 0)
-    {
-        show_message("You cannot buy more than there is.");
+        mvprintw(17, col, "Full address: %s", buyer->address);
     }
     else
     {
-        add_sale(product, get_logged_in_user(), desired, product->price, mode);
-        show_message("Sold. It's all yours now.");
+        mvprintw(17, col, "Pick up at:   %s", product->location);
     }
+    mvprintw(18, col, "Contact No:   %s", buyer->phone);
+    refresh();
+    echo(); // Turn on echo so the user sees what they are typing.
+    curs_set(1); // Show the cursor so the user sees where they are typing.
+    mvscanw(15, col + 14, "%255[^\n]", buyer->full_name);
+    mvprintw(15, col + 14, "%s", buyer->full_name);
+    clrtoeol();
+    refresh();
+    do
+    {
+        mvscanw(16, col + 14, "%d", &quantity);
+        mvprintw(16, col + 14, "%d", quantity);
+        clrtoeol();
+        refresh();
+    }
+    while (quantity < 0 || quantity > product->quantity);
+    if (quantity == 0)
+        return 0;
+    if (mode == SALE_DELIVERY)
+    {
+        mvscanw(17, col + 14, "%255[^\n]", buyer->address);
+        mvprintw(17, col + 14, "%s", buyer->address);
+        clrtoeol();
+        refresh();
+
+    }
+    mvscanw(18, col + 14, "%255[^\n]", buyer->phone);
+    mvprintw(18, col + 14, "%s", buyer->phone);
+    clrtoeol();
+    refresh();
+    curs_set(0); // Hide the cursor again.
+    noecho();
+    return quantity;
 }
 
-void delivered_product(const User *seller, Product *product, int mode)
+void sale_details_screen(Product *product, int mode)
 {
-    int desired = delivery_info(SALE_DELIVERY);
+    int desired = delivery_info(mode, product);
+    if (desired <= 0)
+    {
+        show_message("You entered 0. I'm assuming you got cold feet.");
+        return;
+    }
     int remaining = product_reduce_quantity(product, desired); //Minus the quantity of the product
     if (remaining < 0)
     {
@@ -86,16 +90,15 @@ void delivered_product(const User *seller, Product *product, int mode)
 void buy_product_screen(Product *product)
 {
     const char *buyerm[] = {"Pick-up", "Delivered", "Back", NULL};
-
     while(true)
     {
         switch(menu(buyerm))
         {
         case 0:
-            pickup_product(get_logged_in_user(), product, SALE_PICKUP);
+            sale_details_screen(product, SALE_PICKUP);
             return;
         case 1:
-            delivered_product(get_logged_in_user(), product, SALE_DELIVERY);
+            sale_details_screen(product, SALE_DELIVERY);
             return;
         case 2:
             return;
@@ -213,50 +216,3 @@ void show_buyer_screen()
         }
     }
 }
-
-Buyer *add_buyer(User *seller, const char *buyer_name, const int quantity, const char *location, int contact)
-{
-    /* First, we find the last user in the list. */
-    Buyer *last = buyers;
-    while (last != NULL && last->next != NULL)
-        last = last->next;
-    Buyer *delivery_info = malloc(sizeof(Product));
-    delivery_info->id = ++buyer_max_id; // Assign the next id, increment *before* assignment.
-    delivery_info->seller = seller;
-    strcpy(delivery_info->buyer_name, buyer_name); // Same for the product name
-    delivery_info->quantity = quantity; // This is a simple int, we can just assign it.
-    strcpy(delivery_info->location, location); // Again a string that we need to copy.
-    delivery_info->contact = contact;
-    delivery_info->next = NULL; // Make sure the list is properly terminated.
-    if (last != NULL) // Make sure there is a previous product at all.
-        last->next = delivery_info; // Append to the list.
-    else
-        buyers = delivery_info; // If there was no product before, now this one will be the beginning of our list.
-    return append_buyer(delivery_info);
-}
-
-/* Write a new product to the end of the file. This more robust than writing the complete file every time but of course doesn't work for updates of exisitng products. */
-Buyer *append_buyer(Buyer *delivery_info)
-{
-    if (delivery_info == NULL || delivery_info->seller == NULL)
-    {
-        fprintf(stderr, "Trying to add NULL product or product with NULL seller.\n");
-        return NULL;
-    }
-    FILE *f = fopen(filename, "a+"); // Here we simply append a line at the end of the file. Note that this doesn't work for changes/updates.
-    if (f == NULL)
-    {
-        fprintf(stderr, "%s:%d Could not open file.\n", __FUNCTION__, __LINE__); // Print a nice error message with function name and line number.
-        return NULL;
-    }
-    int written = fprintf(f, "%d,%d,%s,%d,%s,%d \n", delivery_info->id, delivery_info->seller->id, delivery_info->buyer_name, delivery_info->quantity, delivery_info->location, delivery_info->contact);
-    if (written < 0 || written >= BUF_SIZE)
-    {
-        fclose(f); // We don't want dangling open files in case of an error.
-        fprintf(stderr, "%s:%d Could not write file.\n", __FUNCTION__, __LINE__);
-        return NULL;
-    }
-    fclose(f); // We're done here.
-    return delivery_info;
-}
-

@@ -33,4 +33,6 @@ int get_user_count();
 
 User *get_user_by_id(int id);
 
+bool user_has_details(const User *user);
+
 #endif // USER_H_INCLUDED

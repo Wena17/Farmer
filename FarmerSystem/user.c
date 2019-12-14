@@ -220,3 +220,8 @@ User *get_user_by_id(int id)
     }
     return current;
 }
+
+bool user_has_details(const User *user)
+{
+    return user && strlen(user->full_name) && strlen(user->address) && strlen(user->phone);
+}
