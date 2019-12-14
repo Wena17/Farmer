@@ -11,14 +11,17 @@ void show_sales_for_seller()
     clear();
     headMessage("ALL YOUR SALES");
     int page = 0;
-    mvprintw(10, 24, "Product");
-    mvprintw(10, 44, "Buyer Name");
-    mvprintw(10, 59, "Quantity");
-    mvprintw(10, 75, "Price");
+    mvprintw(10, 15, "Product");
+    mvprintw(10, 35, "Buyer Name");
+    mvprintw(10, 55, "Quantity");
+    mvprintw(10, 70, "Price");
+    mvprintw(10, 80, "Total Price");
+    mvprintw(10, 98, "<1>Pick-up");
+    mvprintw(11, 98, "<2>Delivery");
     while(true)
     {
         Sale *current = get_sales();
-        int line = 12;
+        int line = 13;
         int i = 0;
         move(line, 0);
         clrtobot();
@@ -28,15 +31,17 @@ void show_sales_for_seller()
             {
                 if (i >= 9 * page && i < 9 * (page + 1))
                 {
-                    mvprintw(line, 24, "%s", current->product->product_name);
+                    mvprintw(line, 16, "%s", current->product->product_name);
                     clrtoeol();
-                    mvprintw(line, 44, "%s", current->buyer->user_name);
+                    mvprintw(line, 36, "%s", current->buyer->user_name);
                     clrtoeol();
-                    mvprintw(line, 59, "%d", current->quantity);
+                    mvprintw(line, 57, "%d", current->quantity);
                     clrtoeol();
-                    mvprintw(line, 75, "%d", current->price);
+                    mvprintw(line, 72, "%d", current->price);
                     clrtoeol();
-                    mvprintw(line, 80, "%d", current->mode);
+                    mvprintw(line, 85, "%d", current->quantity * current->price);
+                    clrtoeol();
+                    mvprintw(line, 100, "%d", current->mode);
                     clrtoeol();
                     line++;
                 }

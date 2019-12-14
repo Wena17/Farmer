@@ -178,9 +178,10 @@ void show_products()
         int i = 0;
         move(line, 0);
         clrtobot();
+        for (int i = 0; i < 9; i++) displayed_products[i] = NULL;
         while (current != NULL)
         {
-            for (int i = 0; i < 9; i++) displayed_products[i] = NULL;
+
             if (current->seller == get_logged_in_user())
             {
                 if (i >= 9 * page && i < 9 * (page + 1))
@@ -267,6 +268,9 @@ void show_products()
                 show_message("No product selected.");
             }
             break;
+        default:
+            show_message("Invalid Selection");
+            break;
         }
     }
 }
@@ -274,6 +278,7 @@ void show_products()
 char show_edit_menu()
 {
     const int col = COLS / 4;
+    const char *allowed = "0123456789depn";
     mvprintw(LINES - 2, col - 3, "(e) Edit");
     mvprintw(LINES - 2, col + 10, "(d) Delete");
     mvprintw(LINES - 2, col + 25, "(p) Previous");
@@ -281,36 +286,12 @@ char show_edit_menu()
     mvprintw(LINES - 2, col + 55, "(0) Back");
     while (true)
     {
-        char c = getch();
-        switch (c)
+        char c = tolower(getch());
+        const char *s = allowed;
+        while (*s)
         {
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-            return c;
-        case 'e':
-        case 'E':
-            return 'e';
-        case 'd':
-        case 'D':
-            return 'd';
-        case '0':
-            return '0';
-        case 'p':
-        case 'P':
-            return 'p';
-        case 'n':
-        case 'N':
-            return 'n';
-        default:
-            show_message("Invalid selection");
-            break;
+            if (*s == c) return c;
+            s++;
         }
     }
 }
