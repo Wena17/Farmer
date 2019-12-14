@@ -1,5 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+
 #include "curses.h"
 #include "ui.h"
 #include "user.h"
@@ -8,6 +10,28 @@
 
 Product *product;
 User *user;
+
+/* Show a menu with common options for a paged list and wait for the user to select one. */
+char show_edit_menu(bool has_edit)
+{
+    const int col = COLS / 4;
+    const char *allowed = "0123456789depn";
+    if (has_edit) mvprintw(LINES - 2, col - 3, "(e) Edit");
+    mvprintw(LINES - 2, col + 10, "(d) Delete");
+    mvprintw(LINES - 2, col + 25, "(p) Previous");
+    mvprintw(LINES - 2, col + 38, "(n) Next");
+    mvprintw(LINES - 2, col + 55, "(0) Back");
+    while (true)
+    {
+        char c = tolower(getch());
+        const char *s = allowed;
+        while (*s)
+        {
+            if (*s == c && (has_edit || c != 'e')) return c;
+            s++;
+        }
+    }
+}
 
 /* Show a menu with a null-pointer terminated list of items and return the index of the user's selection.
  *

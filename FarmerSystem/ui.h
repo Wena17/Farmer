@@ -8,6 +8,7 @@
 int menu(const char **items);
 void show_message(char *msg);
 void headMessage(const char *message);
+char show_edit_menu(bool has_edit);
 
 Product *new_product(User *user, char *product_type);
 Product *add_product(User *seller, const char *product_type, const char *product_name, const int quantity, const int price, const char *location);

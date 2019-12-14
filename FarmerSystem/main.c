@@ -21,7 +21,6 @@ void show_products();
 void edit_product_menu();
 void product_edit_screen();
 void show_users();
-char show_edit_menu();
 char admin_menu();
 
 int main()
@@ -209,7 +208,7 @@ void show_products()
             current = current->next;
         }
         bool is_last_page = current == NULL;
-        char c = show_edit_menu();
+        char c = show_edit_menu(true);
         switch (c)
         {
         case '1':
@@ -275,27 +274,6 @@ void show_products()
     }
 }
 
-char show_edit_menu()
-{
-    const int col = COLS / 4;
-    const char *allowed = "0123456789depn";
-    mvprintw(LINES - 2, col - 3, "(e) Edit");
-    mvprintw(LINES - 2, col + 10, "(d) Delete");
-    mvprintw(LINES - 2, col + 25, "(p) Previous");
-    mvprintw(LINES - 2, col + 38, "(n) Next");
-    mvprintw(LINES - 2, col + 55, "(0) Back");
-    while (true)
-    {
-        char c = tolower(getch());
-        const char *s = allowed;
-        while (*s)
-        {
-            if (*s == c) return c;
-            s++;
-        }
-    }
-}
-
 void show_users()
 {
     clear();
@@ -350,13 +328,8 @@ void show_users()
             current = current->next;
         }
         bool is_last_page = current == NULL;
-        const int col = COLS / 4;
-        mvprintw(LINES - 2, col - 3, "(d) Delete");
-        mvprintw(LINES - 2, col + 15, "(p) Previous");
-        mvprintw(LINES - 2, col + 35, "(n) Next");
-        mvprintw(LINES - 2, col + 50, "(0) Logout");
-        char c = getch();
-        switch (tolower(c))
+        char c = show_edit_menu(false);
+        switch (c)
         {
         case '1':
         case '2':
