@@ -19,7 +19,6 @@ void newproduct_menu();
 void seller_menu();
 void show_products();
 void edit_product_menu();
-void product_edit_screen();
 void show_users();
 char admin_menu();
 

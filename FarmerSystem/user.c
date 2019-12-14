@@ -6,7 +6,8 @@
 #include "user.h"
 
 #define filename "users.csv"
-#define BUF_SIZE 256
+
+#define BUF_SIZE 2048
 
 User *users; // This is where we will keep the users.
 int users_max_id = 0; // We keep track of the highest ID so we know which one to use next.
@@ -20,9 +21,12 @@ int load_users()
         /* Opening the file did not work, so we create the admin user. */
         users = malloc(sizeof(User)); // Create one user. In C, you always have to allocate memory before you can write to it. That's what malloc does.
         users->id = ++users_max_id; // Increment *before* assigning. Every user gets a unique ID number.
-        strcpy(users->user_name, "admin"); // Here I'm simply copying the strings to the new user data structure.
-        strcpy(users->email, "test@example.org"); // Same for the email.
-        strcpy(users->pw_hash, "xyz"); // And finally the (unencrypted) password.
+        strcpy(users->user_name, "admin");
+        strcpy(users->email, "");
+        strcpy(users->pw_hash, "xyz");
+        strcpy(users->full_name, "Admin");
+        strcpy(users->address, ""); // The admin user has no address.
+        strcpy(users->phone, ""); // The admin user has no phone.
         users->is_admin = 1; // The first user is the admin. Everybody else will be admin=0.
         users->is_seller = 0;
         users->next = NULL; // This is a pointer to the next user, creating a linked list of users. There is only one user here, so the "next" user is NULL.
@@ -32,15 +36,27 @@ int load_users()
     char buf[BUF_SIZE]; // We'll use this variable to load lines of our file into. C is not very convenient when it comes to strings, you have to do a lot of stuff by hand.
     User *previous = NULL; // We keep track of the previous user we've read so we can set its "next" pointer later. This will become clearer further down.
     int count = 0; // Let's count the users.
-    users_max_id = 0; // Keeping track of the highest id.
+    users_max_id = 0; // To keep track of the highest id, we reset it first.
     while (true) // Endless loop.
     {
         if (fgets(buf, BUF_SIZE, f) == NULL) //  We read the next line from the file into our buf variable. If we get NULL, we've reached the end of the file.
             break; // ... so exit the loop.
-        User *u = malloc(sizeof(User)); // Allocate memory for one user. Again, we need to do the memory management by hand because we don't know the number of users in advance and C has no resizable arrays.
+        User *u = malloc(sizeof(User)); // Allocate memory for one user.
+        strcpy(u->full_name, "");
+        strcpy(u->address, "");
+        strcpy(u->phone, "");
         u->next = NULL; // Initialize link in case this is the last one.
-        int rc = sscanf(buf, " %d,%31[^,\n],%255[^,\n],%255[^,\n],%d,%d", &u->id, u->user_name, u->email, u->pw_hash, (int *) &u->is_admin, (int *) &u->is_seller); // Read the various fields from the line in our buf variable.
-        if (rc != 6) // The number of fields read is in rc. This should be 5 unless it's somehow an invalid line. If it's invalid, simply skip it.
+        int rc = sscanf(buf, "%d,%255[^,\n],%255[^,\n],%255[^,\n],%d,%d,%255[^,\n],%255[^,\n],%255[^,\n]",
+                        &u->id,
+                        u->user_name,
+                        u->email,
+                        u->pw_hash,
+                        (int *) &u->is_admin,
+                        (int *) &u->is_seller,
+                        u->full_name,
+                        u->address,
+                        u->phone);
+        if (rc < 6) // The number of fields read is in rc. This should be 5 unless it's somehow an invalid line. If it's invalid, simply skip it.
         {
             free(u); // Free the allocated memory because we're skipping, so we don't run out of memory eventually. It's the opposite of malloc.
             fprintf(stderr, "Skipping invalid line.\n"); // Be nice and print a notice.
@@ -74,11 +90,11 @@ int save_users() {
     int count = 0; // Let's count the users.
     while (u != NULL) // while we have more, we loop.
     {
-        int written = fprintf(f, "%d,%s,%s,%s,%d,%d\n", u->id, u->user_name, u->email, u->pw_hash, u->is_admin, u->is_seller);
+        int written = fprintf(f, "%d,%s,%s,%s,%d,%d,%s,%s,%s\n", u->id, u->user_name, u->email, u->pw_hash, u->is_admin, u->is_seller, u->full_name, u->address, u->phone);
         if (written < 0 || written >= BUF_SIZE)
         {
             fclose(f); // We don't want dangling open files in case of an error.
-            fprintf(stderr, "%s:%d Could not write file.\n", __FUNCTION__, __LINE__);
+            fprintf(stderr, "%s:%d Could not write file. User ID %d\n", __FUNCTION__, __LINE__, u->id);
             return -1;
         }
         fprintf(stderr, "Wrote user %d: %s\n", u->id, u->user_name);
@@ -114,6 +130,9 @@ User *add_user(const char *user_name, const char *email, const char *pw_hash, co
     strcpy(u->user_name, user_name);
     strcpy(u->email, email);
     strcpy(u->pw_hash, pw_hash);
+    strcpy(u->full_name, "");
+    strcpy(u->address, "");
+    strcpy(u->phone, "");
     u->is_admin = false;
     u->is_seller = is_seller;
     u->next = NULL; // Make sure the list is properly terminated.
@@ -124,7 +143,7 @@ User *add_user(const char *user_name, const char *email, const char *pw_hash, co
         fprintf(stderr, "%s:%d Could not open file.\n", __FUNCTION__, __LINE__); // Print a nice error message with function name and line number.
         return NULL;
     }
-    int written = fprintf(f, "%d,%s,%s,%s,%d,%d\n", u->id, u->user_name, u->email, u->pw_hash, u->is_admin, u->is_seller);
+    int written = fprintf(f, "%d,%s,%s,%s,%d,%d,%s,%s,%s\n", u->id, u->user_name, u->email, u->pw_hash, u->is_admin, u->is_seller, u->full_name, u->address, u->phone);
     if (written < 0 || written >= BUF_SIZE)
     {
         fclose(f); // We don't want dangling open files in case of an error.

@@ -13,6 +13,5 @@ char show_menu(char *menu_chars, char **menu_items); // This is a small menu at 
 void show_purchases();
 
 Product *new_product(User *user, char *product_type);
-Product *add_product(User *seller, const char *product_type, const char *product_name, const int quantity, const int price, const char *location);
 
 #endif // UI_H_INCLUDED

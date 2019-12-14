@@ -3,12 +3,17 @@
 
 #include <stdlib.h>
 
+#define MAXLEN 256
+
 typedef struct User
 {
     unsigned int id;
-    char user_name[32];
-    char email[256];
-    char pw_hash[256];
+    char user_name[MAXLEN];
+    char email[MAXLEN];
+    char pw_hash[MAXLEN];
+    char full_name[MAXLEN];
+    char address[MAXLEN];
+    char phone[MAXLEN];
     bool is_admin;
     bool is_seller;
     struct User *next;
