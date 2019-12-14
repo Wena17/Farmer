@@ -86,8 +86,19 @@ void list_free(List *list)
     ListItem *current = list->head;
     while (current)
     {
+        ListItem *previous = current;
         current = current->next;
-        free(current);
+        free(previous);
     }
     free(list);
+}
+
+void for_each(List *list, void (*f)(void *))
+{
+    ListItem *current = list->head;
+    while (current)
+    {
+        f(current->value);
+        current = current->next;
+    }
 }

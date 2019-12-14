@@ -21,4 +21,7 @@ void *list_delete(List *list, void *value);
 
 int list_length(List *);
 
+/* Execute the function f for each item in the list. f must take each value as its single parameter. */
+void for_each(List *list, void (*f)(void *));
+
 #endif // LIST_H_INCLUDED
