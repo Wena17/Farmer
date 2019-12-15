@@ -16,7 +16,8 @@ void login_init()
 
 void display_user()
 {
-    if (!user_win) user_win = newwin(1, 20, 0, 0);
+    if (!user_win)
+        user_win = newwin(1, 20, 0, 0);
     wclear(user_win);
     mvwprintw(user_win, 0, 0, "%s", get_logged_in_user() ? get_logged_in_user()->user_name : "Anonymous");
     wrefresh(user_win);
@@ -24,7 +25,8 @@ void display_user()
 
 bool login_or_signup(const bool is_seller)
 {
-    if (user) return true;
+    if (user)
+        return true; // Already logged in.
     clear();
     headMessage("WHAT'S NEXT?");
     const char *solm[] = { "Login", "Sign up", "Exit", NULL };
@@ -36,19 +38,28 @@ bool login_or_signup(const bool is_seller)
             login();
             break;
         case 1:
-            signup(is_seller);//If user name already exist should be error
+            signup(is_seller); // If user name already exists, there should be error.
             break;
         case 2:
-            exit(0);
+            break;
         }
+    }
+    if (user && user->is_seller != is_seller)
+    {
+        user = NULL;
+        if (is_seller)
+            show_message("User is not a seller.");
+        else
+            show_message("User is not a buyer.");
     }
     return user != NULL;
 }
 
- bool login()
+bool login()
 {
     headMessage("LOGIN");
-    if (user) return true;
+    if (user)
+        return true;
     char user_name[30];
     char pass[20];
     int width = COLS / 2;
@@ -95,7 +106,8 @@ bool login_or_signup(const bool is_seller)
 bool signup(const bool is_seller)
 {
     headMessage("SIGN UP");
-    if (user) return true;
+    if (user)
+        return true;
     char user_name[21];
     char email[256];
     char pw_hash[11];

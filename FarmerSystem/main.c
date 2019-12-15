@@ -87,7 +87,7 @@ void homePage()
             break;
         case 1:
             login_or_signup(true);
-            if (get_logged_in_user() != NULL)
+            if (get_logged_in_user())
                 seller_menu();
             break;
         case 2:
