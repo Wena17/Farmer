@@ -18,17 +18,18 @@ void show_purchases()
     const User *current_user = get_logged_in_user();
     const bool is_seller = current_user->is_seller;
     clear();
-    headMessage(is_seller ? "ALL YOUR SALES" : "ALL YOUR PURCHASES");
     int page = 0;
-    mvprintw(10, 15, "Product");
-    mvprintw(10, 35, is_seller ? "Buyer Name" : "Seller Name");
-    mvprintw(10, 55, "Quantity");
-    mvprintw(10, 70, "Price");
-    mvprintw(10, 80, "Total Price");
-    mvprintw(10, 98, "<1>Pick-up");
-    mvprintw(11, 98, "<2>Delivery");
+
     while(true)
     {
+        headMessage(is_seller ? "ALL YOUR SALES" : "ALL YOUR PURCHASES");
+        mvprintw(10, 15, "Product");
+        mvprintw(10, 35, is_seller ? "Buyer Name" : "Seller Name");
+        mvprintw(10, 55, "Quantity");
+        mvprintw(10, 70, "Price");
+        mvprintw(10, 80, "Total Price");
+        mvprintw(10, 98, "<1>Pick-up");
+        mvprintw(11, 98, "<2>Delivery");
         Sale *current = get_sales();
         int line = 13;
         int i = 0;
@@ -101,7 +102,8 @@ char show_menu(char *menu_chars, char **menu_items)
     {
         total_length += strlen(*current_item) + 4;
         current_item++;
-        if (current_item) total_length += 2;
+        if (current_item)
+            total_length += 2;
     }
     int col = (COLS - total_length) / 2;
     col = col < 0 ? 0 : col;
@@ -121,7 +123,8 @@ char show_menu(char *menu_chars, char **menu_items)
         const char *s = menu_chars;
         while (*s)
         {
-            if (*s == c) return c;
+            if (*s == c)
+                return c;
             s++;
         }
     }
@@ -133,18 +136,20 @@ char show_edit_menu(bool has_edit)
 {
     const int col = COLS / 4;
     const char *allowed = "0123456789depn";
-    if (has_edit) mvprintw(LINES - 2, col - 3, "(e) Edit");
-    mvprintw(LINES - 2, col + 10, "(d) Delete");
-    mvprintw(LINES - 2, col + 25, "(p) Previous");
-    mvprintw(LINES - 2, col + 38, "(n) Next");
-    mvprintw(LINES - 2, col + 55, "(0) Back");
+    if (has_edit)
+        mvprintw(LINES - 2, col - 15, "(e) Edit");
+    mvprintw(LINES - 2, col, "(d) Delete");
+    mvprintw(LINES - 2, col + 15, "(p) Previous");
+    mvprintw(LINES - 2, col + 32, "(n) Next");
+    mvprintw(LINES - 2, col + 47, "(0) Back");
     while (true)
     {
         char c = tolower(getch());
         const char *s = allowed;
         while (*s)
         {
-            if (*s == c && (has_edit || c != 'e')) return c;
+            if (*s == c && (has_edit || c != 'e'))
+                return c;
             s++;
         }
     }
@@ -206,6 +211,7 @@ Product *new_product(User *user, char *product_type)
     int quantity;
     int price;
     char location[256];
+    char date[256];
     Product *newproduct = NULL;
     int width = COLS / 2;
     int height = 8;
@@ -214,20 +220,22 @@ Product *new_product(User *user, char *product_type)
     mvwprintw(win, 2, 2, "Product name: ");
     mvwprintw(win, 3, 2, "Quantity: ");
     mvwprintw(win, 4, 2, "Price: ");
-    mvwprintw(win, 5, 2, "Location: ");
+    mvwprintw(win, 5, 2, "Date (D/M/Y): ");
+    mvwprintw(win, 6, 2, "Location: ");
     wrefresh(win);
     echo();
     curs_set(1);
     mvwscanw(win, 2, 15, "%50[^\n]", product_name);
     mvwscanw(win, 3, 15, "%d", &quantity);
     mvwscanw(win, 4, 15, "%d", &price);
-    mvwscanw(win, 5, 15, "%100[^\n]", location);
+    mvwscanw(win, 5, 15, "%100s", date);
+    mvwscanw(win, 6, 15, "%100[^\n]", location);
     curs_set(0);
     noecho();
     wmove(win, 4, 12);
     wclrtoeol(win); // Let's delete the password for security.
     wrefresh(win);
-    newproduct = add_product(user, product_type, product_name, quantity, price, location); // Now add and save the product, return the new id.
+    newproduct = add_product(user, product_type, product_name, quantity, price, date, location); // Now add and save the product, return the new id.
     if (newproduct == NULL) // Something went wrong.
     {
         mvwprintw(win, 6, 2, "Something went wrong. Press any key to continue.");

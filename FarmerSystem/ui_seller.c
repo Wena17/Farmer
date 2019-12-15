@@ -89,6 +89,8 @@ void show_sales_for_seller()
 void product_edit_screen(Product *p)
 {
     clear();
+    refresh();
+    headMessage("UPDATING PRODUCTS");
     int width = COLS / 2;
     int height = 12;
     WINDOW *win = newwin(height, width, (LINES - height) / 2, (COLS - width) / 2);
@@ -98,6 +100,7 @@ void product_edit_screen(Product *p)
     mvwprintw(win, 4, 4, "Quantity:     %d", p->quantity);
     mvwprintw(win, 5, 4, "Price:        %d", p->price);
     mvwprintw(win, 6, 4, "Location:     %s", p->location);
+    mvwprintw(win, 7, 4, "Date:     %s", p->date);
     wrefresh(win);
     echo(); // Turn on echo so the user sees what they are typing.
     curs_set(1); // Show the cursor so the user sees where they are typing.
@@ -105,6 +108,7 @@ void product_edit_screen(Product *p)
     mvwscanw(win, 3, 18, "%255[^\n]", p->product_name);
     mvwscanw(win, 4, 18, "%d", &p->quantity);
     mvwscanw(win, 5, 18, "%d", &p->price);
+    mvwscanw(win, 6, 18, "%255[^\n]", p->date);
     mvwscanw(win, 6, 18, "%255[^\n]", p->location);
     curs_set(0); // Hide the cursor again.
     wrefresh(win);

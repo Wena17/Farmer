@@ -35,8 +35,8 @@ int load_products()
         Product *u = malloc(sizeof(Product));
         u->next = NULL; // Initialize link in case this is the last one.
         int seller_id;
-        int rc = sscanf(buf, " %d,%d,%49[^,\n],%31[^,\n],%d,%d,%255[^,\n]", &u->id, &seller_id, u->product_type, u->product_name, &u->quantity, &u->price, u->location); // Read the various fields from the line in our buf variable.
-        if (rc != 7) // The number of fields read is in rc. This should be 5 unless it's somehow an invalid line. If it's invalid, simply skip it.
+        int rc = sscanf(buf, " %d,%d,%49[^,\n],%31[^,\n],%d,%d,%255[^,\n],%255[^,\n]", &u->id, &seller_id, u->product_type, u->product_name, &u->quantity, &u->price, u->date, u->location); // Read the various fields from the line in our buf variable.
+        if (rc != 8) // The number of fields read is in rc. This should be 5 unless it's somehow an invalid line. If it's invalid, simply skip it.
         {
             free(u); // Free the allocated memory because we're skipping, so we don't run out of memory eventually. It's the opposite of malloc.
             fprintf(stderr, "WARNING! Skipping invalid line '%s'.\n", buf); // Be nice and print a notice.
@@ -72,7 +72,7 @@ int save_products()
     int count = 0; // Let's count the users.
     while (current != NULL) // while we have more, we loop.
     {
-        int written = fprintf(f, "%d,%d,%s,%s,%d,%d,%s\n", current->id, current->seller->id, current->product_type, current->product_name, current->quantity, current->price, current->location);
+        int written = fprintf(f, "%d,%d,%s,%s,%d,%d,%s,%s\n", current->id, current->seller->id, current->product_type, current->product_name, current->quantity, current->price, current->date, current->location);
         if (written < 0 || written >= BUF_SIZE)
         {
             fclose(f); // We don't want dangling open files in case of an error.
@@ -97,7 +97,7 @@ int save_products()
     return count;
 }
 
-Product *add_product(User *seller, const char *product_type, const char *product_name, const int quantity, const int price, const char *location)
+Product *add_product(User *seller, const char *product_type, const char *product_name, const int quantity, const int price, const char *date, const char *location)
 {
     /* First, we find the last user in the list. */
     Product *last = products;
@@ -110,6 +110,7 @@ Product *add_product(User *seller, const char *product_type, const char *product
     strcpy(new_product->product_name, product_name); // Same for the product name
     new_product->quantity = quantity; // This is a simple int, we can just assign it.
     new_product->price = price; // Same (we only consider full pesos.
+    strcpy(new_product->date, date);
     strcpy(new_product->location, location); // Again a string that we need to copy.
     new_product->next = NULL; // Make sure the list is properly terminated.
     if (last != NULL) // Make sure there is a previous product at all.
@@ -140,6 +141,7 @@ Product *append_product(Product *new_product)
                           new_product->product_name,
                           new_product->quantity,
                           new_product->price,
+                          new_product->date,
                           new_product->location);
     if (written < 0 || written >= BUF_SIZE)
     {

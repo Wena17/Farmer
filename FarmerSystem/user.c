@@ -79,7 +79,8 @@ int load_users()
 
 /* Save all users in the file and return the number of users, or -1 if something went wrong.
  * This is actually a bit bad because when the writing fails, all data would be lost. Don't worry for now but in a real program this would have to be handled better. */
-int save_users() {
+int save_users()
+{
     FILE *f = fopen(filename, "w+");
     if (f == NULL)
     {
@@ -178,20 +179,20 @@ void delete_user(User *user)
     User *previous = NULL;
     while (current)
     {
-            if (current == user) // If we have found the user to delete, we delete it.
+        if (current == user) // If we have found the user to delete, we delete it.
+        {
+            if (previous) // If there is a previous user, then remove this one from the list.
             {
-                if (previous) // If there is a previous user, then remove this one from the list.
-                {
-                    previous->next = current->next; // .. then make this one's seccessor the next of the previous.
-                }
-                else // Otherwise this one is the first in the list.
-                {
-                    users = current->next; // ... so move the head of the list to the next one.
-                }
-                free(current); // Free memory of the deleted user.
-                save_users(); // Save our changes to disk.
-                return;
+                previous->next = current->next; // .. then make this one's seccessor the next of the previous.
             }
+            else // Otherwise this one is the first in the list.
+            {
+                users = current->next; // ... so move the head of the list to the next one.
+            }
+            free(current); // Free memory of the deleted user.
+            save_users(); // Save our changes to disk.
+            return;
+        }
         previous = current;
         current = current->next; // Got to the next product in the list.
     }

@@ -10,6 +10,7 @@ typedef struct Product
     char product_type[256];
     int quantity;
     int price;
+    char date[265];
     char location[256];
     struct User *seller;
     struct Product *next;
@@ -18,7 +19,7 @@ typedef struct Product
 int load_products();
 int save_products();
 
-Product *add_product(User *seller, const char *product_type, const char *product_name, const int quantity, const int price, const char *location);
+Product *add_product(User *seller, const char *product_type, const char *product_name, const int quantity, const int price, const char *date, const char *location);
 void delete_product(Product *p);
 Product *get_products();
 int get_product_count(const User *u);

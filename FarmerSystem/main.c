@@ -44,11 +44,11 @@ void welcomeMessage()
     headMessage("Welcome");
     /* This can be optimized to use screen coordinates. */
     move(9, 0);
-    printw("\n\n\n\t\t\t\t\t\t같같같같같같같같같같같같같같같");
-    printw("\n\t\t\t\t\t      같                              같");
-    printw("\n\t\t\t\t\t   같                                    같");
-    printw("\n\t\t\t\t\t같                                          같");
-    printw("\n\t\t\t\t     같  ||                 WELCOME                ||  같");
+    printw("\n\n\n\t\t\t\t\t\t°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°");
+    printw("\n\t\t\t\t\t      °°                              °°");
+    printw("\n\t\t\t\t\t   °°                                    °°");
+    printw("\n\t\t\t\t\t°°                                          °°");
+    printw("\n\t\t\t\t     °°  ||                 WELCOME                ||  °°");
     printw("\n\t\t\t\t\t  ||                  TO                  ||  ");
     printw("\n\t\t\t\t\t   ||               FARMER's             ||  ");
     printw("\n\t\t\t\t\t   ||             COOPERATIVE            ||  ");
@@ -87,7 +87,7 @@ void homePage()
             break;
         case 1:
             login_or_signup(true);
-            if (get_logged_in_user() != NULL)
+            if (get_logged_in_user())
                 seller_menu();
             break;
         case 2:
@@ -390,5 +390,3 @@ void show_users()
     }
 
 }
-
-

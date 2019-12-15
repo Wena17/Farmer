@@ -10,6 +10,7 @@ bool login();
 bool signup(const bool is_seller);
 User *get_logged_in_user();
 bool have_admin_rights();
+bool have_seller_rights();
 void logout();
 
 #endif // LOGIN_H_INCLUDED
